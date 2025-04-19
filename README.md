@@ -19,6 +19,16 @@ pyenv local 3.11.9
 
 ## ⚙️ Virtual Environment
 
+### 🔹 Create a virtual environment
+
+Make sure you're in the root of the project, then run:
+
+```bash
+python -m venv venv
+```
+
+This will create a `venv/` folder with a standalone Python environment.
+
 ### 🔹 Activate the virtual environment
 
 ```bash
@@ -33,6 +43,7 @@ venv\Scripts\activate
 ```
 
 ### Verify the environment is active
+
 ```bash
 which python
 ```
@@ -43,10 +54,20 @@ which python
 - **Windows:** should return something like
 `...\venv\Scripts\python.exe`
 
-
 ### 📦 Install dependencies
+
 ```bash
 pip install -r requirements.txt
 ```
+
+### ⚠️ VS Code users
+
+If you're using **Visual Studio Code**, make sure it uses the correct Python interpreter:
+
+1. Press `Cmd + Shift + P` (or `Ctrl + Shift + P` on Windows)
+2. Select: `Python: Select Interpreter`
+3. Choose the one that ends with `/venv/bin/python` (macOS/Linux) or `\venv\Scripts\python.exe` (Windows)
+
+This will ensure IntelliSense and imports work correctly.
 
 

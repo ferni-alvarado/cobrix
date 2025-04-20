@@ -22,8 +22,7 @@ INSTRUCTIONS_PATH = (
 # Function to load instructions from file
 def load_instructions():
     with open(INSTRUCTIONS_PATH, "r", encoding="utf-8") as file:
-        instructions = file.read()
-        return instructions
+        return file.read()
 
 
 # Internal OCR function (not exposed to the agent)

@@ -5,8 +5,13 @@ from datetime import datetime
 from pathlib import Path
 
 import easyocr
-from agents import Agent, OpenAIChatCompletionsModel, Runner, set_tracing_disabled
-from agents.tool import function_tool
+from agents import (
+    Agent,
+    OpenAIChatCompletionsModel,
+    Runner,
+    function_tool,
+    set_tracing_disabled,
+)
 
 from my_agents.config import MODEL_NAME, TRACING_ENABLED, client
 

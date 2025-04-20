@@ -26,46 +26,44 @@ def load_instructions():
         return instructions
 
 
+# Internal OCR function (not exposed to the agent)
 def _extract_text_from_image(image_path: str):
     reader = easyocr.Reader(["es"], gpu=False)
     results = reader.readtext(image_path)
+    return " ".join([text for _, text, _ in results])
 
-    extracted_text = " ".join([text for _, text, _ in results])
 
+# Tool 1 - OCR
+@function_tool
+def extract_text_from_image(image_path: str) -> dict:
+    """
+    Extracts raw text from a payment receipt image using OCR.
+    Returns the raw text to be analyzed later.
+    """
+    text = _extract_text_from_image(image_path)
+    return {"text": text}
+
+
+# Tool 2 - Text analysis
+@function_tool
+def analyze_payment_receipt(text: str) -> dict:
+    """
+    Given the raw text extracted from a payment receipt, analyzes and returns structured payment information.
+    """
     return {
-        "extracted_text": extracted_text,
-        "confidence_scores": [float(prob) for _, _, prob in results],
-        "text_elements": [text for _, text, _ in results],
+        "status": "pending",
+        "reason": "Tool placeholder. Implemented by the agent using the language model.",
     }
 
 
-@function_tool
-def extract_text_from_image(image_path: str):
-    return _extract_text_from_image(image_path)
-
-
-@function_tool
-def analyze_payment_receipt(text: str):
-    pass
-
-
-async def process_receipt(image_path, agent):
-    print(f"Procesando imagen: {image_path}")
-
-    # First we extract the text with our tool
-    # Note: in this first implementation we call the function directly instead of using the agent
-    ocr_result = _extract_text_from_image(image_path)
-
-    prompt = f"""I have extracted the following text from a payment receipt image. Please analyze it and provide a detailed verification of the payment receipt: {ocr_result['extracted_text']}"""
-
-    # Run the agent with the tools available
-    result = await Runner.run(agent, prompt)
-
-    return {
-        "image_path": image_path,
-        "ocr_text": ocr_result,
-        "analysis": result.final_output,
-    }
+def extract_json_from_response(response: str) -> dict:
+    match = re.search(r"\{.*\}", response, re.DOTALL)
+    if match:
+        try:
+            return json.loads(match.group())
+        except json.JSONDecodeError:
+            return {"error": "Failed to parse JSON from agent response"}
+    return {"error": "No JSON found in agent response"}
 
 
 async def main():
@@ -76,41 +74,50 @@ async def main():
 
     # Initialize the agent
     agent = Agent(
-        name="Payment Verifier Assistant",
+        name="Payment Verifier",
         instructions=instructions,
         model=OpenAIChatCompletionsModel(model=MODEL_NAME, openai_client=client),
-        tools=[
-            extract_text_from_image,
-            analyze_payment_receipt,
-        ],
+        tools=[extract_text_from_image, analyze_payment_receipt],
     )
 
     # Get all receipt images
+    receipts_dir = Path("data/receipts")
     receipt_images = (
-        glob.glob("data/receipts/*.jpeg")
-        + glob.glob("data/receipts/*.jpg")
-        + glob.glob("data/receipts/*.png")
+        list(receipts_dir.glob("*.jpg"))
+        + list(receipts_dir.glob("*.jpeg"))
+        + list(receipts_dir.glob("*.png"))
     )
 
     if not receipt_images:
-        print("No receipt images found in the specified directory.")
+        print("No receipt images found.")
         return
 
     # Process each receipt
-    results = []
+    today_str = datetime.now().strftime("%Y-%m-%d")
+    output_dir = Path(f"data/results/{today_str}")
+    output_dir.mkdir(parents=True, exist_ok=True)
+
     for image_path in receipt_images:
-        result = await process_receipt(image_path, agent)
-        results.append(result)
+        print(f"Processing {image_path}...")
+        prompt = f"Please, analyze the payment receipt in the image: {str(image_path)}"
+        result = await Runner.run(agent, prompt)
 
-    # Save results to a JSON file
-    output_dir = Path("data/results")
-    output_dir.mkdir(exist_ok=True)
+        receipt_id = Path(image_path).stem  # file name without extension
+        parsed_json = extract_json_from_response(result.final_output)
 
-    output_file = output_dir / "verification_results.json"
-    with open(output_file, "w", encoding="utf-8") as f:
-        json.dump(results, f, indent=2)
+        output_data = {
+            "receipt_id": receipt_id,
+            "image_path": str(image_path),
+            "structured_data": parsed_json,
+            "raw_response": result.final_output,
+        }
 
-    print(f"Results saved to {output_file}")
+        output_file = output_dir / f"receipt_result_{receipt_id}.json"
+
+        with open(output_file, "w", encoding="utf-8") as f:
+            json.dump(output_data, f, indent=2)
+
+        print(f"✅ Saved: {output_file}")
 
 
 if __name__ == "__main__":

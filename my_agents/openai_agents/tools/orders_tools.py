@@ -13,7 +13,7 @@ def verify_order(products_requested: list[Product]) -> OrderVerificationResult:
     """
     Verify if the requested products are available in stock and calculate subtotals.
     """
-    df = pd.read_csv("productos_completo.csv")
+    df = pd.read_csv("data/products_inventory.csv")
     df["producto"] = df["producto"].str.lower()
 
     result = OrderVerificationResult(
@@ -57,7 +57,7 @@ def verify_ice_cream_flavors(
     """
     Verify if the requested ice cream flavors are available in stock.
     """
-    df = pd.read_csv("sabores_helado.csv")
+    df = pd.read_csv("data/icecream_flavors.csv")
     df["sabor"] = df["sabor"].str.lower()
 
     result = IceCreamFlavorsVerificationResult(
@@ -109,13 +109,13 @@ def test_verify_ice_cream_flavors():
 
 def test_preview_products():
     print("📄 Available products (first 5 rows):")
-    df = pd.read_csv("productos_completo.csv")
+    df = pd.read_csv("data/products_inventory.csv")
     print(df.head())
 
 
 def test_preview_flavors():
     print("📄 Available ice cream flavors:")
-    df_flavors = pd.read_csv("sabores_helado.csv")
+    df_flavors = pd.read_csv("data/icecream_flavors.csv")
     print(df_flavors)
 
 

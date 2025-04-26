@@ -22,10 +22,17 @@ def check_payment_status(preference_id: str) -> dict:
 
 
 ## MEJORAR QUERYPARAMS!
-async def run_agent_with_status():
+async def run_agent_with_preference_id(preference_id: str):
     """
-    Run the payment status agent with a given preference ID.
+    Runs the Payment Status Checker Agent to verify the status of a payment via its preference ID.
+
+    Args:
+        preference_id (str): The Mercado Pago preference ID to check.
+
+    Returns:
+        dict: Payment status data including 'status', 'last_update', and 'preference_id'.
     """
+
     instructions = load_instructions("payment_status_instructions")
 
     agent = Agent(
@@ -35,12 +42,10 @@ async def run_agent_with_status():
         tools=[check_payment_status],
     )
 
-    reference_id = "182515349-d317f980-fd6a-441c-9cb6-e66966b619c7"
+    test_preference_id = "182515349-d317f980-fd6a-441c-9cb6-e66966b619c7"
 
     # Probar con una preference ID real o simulada
-    prompt = "Check the payment status for preference ID: {reference_id}".format(
-        reference_id=reference_id
-    )
+    prompt = f"Check the payment status for preference ID: {preference_id}"
     result = await Runner.run(agent, prompt)
     print(result.final_output)
     return result

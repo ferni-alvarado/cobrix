@@ -1,0 +1,21 @@
+{
+  "order_id": "ORD-TEST-99",
+  "payer_name": "Fernando L\u00f3pez",
+  "items": [
+    {
+      "title": "Empanadas x12",
+      "quantity": 1,
+      "unit_price": 4200.0
+    },
+    {
+      "title": "Coca-Cola 1.5L",
+      "quantity": 2,
+      "unit_price": 1800.0
+    }
+  ],
+  "preference_id": "182515349-6920c313-661f-462c-b185-ee5c6fe4ca8b",
+  "init_point": "https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=182515349-6920c313-661f-462c-b185-ee5c6fe4ca8b",
+  "total_amount": 7800.0,
+  "timestamp": "2025-04-25T23:21:18.264421",
+  "status": "pending"
+}

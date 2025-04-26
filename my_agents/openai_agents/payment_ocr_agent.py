@@ -59,8 +59,14 @@ def extract_json_from_response(response: str) -> dict:
     return {"error": "No JSON found in agent response"}
 
 
-## DEFINIR QUERYPARAMS Y RENOMBRAR MAIN
-async def main():
+async def run_agent_with_receipt():
+    """
+    Runs the Payment OCR Agent to extract and analyze data from a payment receipt (image or PDF).
+
+    This agent uses OCR to extract text and detect key fields like payer name, amount, and transaction ID.
+    Returns structured data or flags inconsistencies for human review.
+    """
+
     instructions = load_instructions("payment_ocr_instructions")
 
     agent = Agent(

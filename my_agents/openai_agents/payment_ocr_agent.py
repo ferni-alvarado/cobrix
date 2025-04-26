@@ -14,20 +14,9 @@ from agents import (
 )
 
 from my_agents.config import MODEL_NAME, TRACING_ENABLED, client
+from my_agents.utils.instructions import load_instructions
 
-# Disable tracing since we're not connected to a supported tracing provider
 set_tracing_disabled(disabled=not TRACING_ENABLED)
-
-# Path to the instructions file
-INSTRUCTIONS_PATH = (
-    Path(__file__).parent.parent / "prompts" / "payment_ocr_instructions.md"
-)
-
-
-# Function to load instructions from file
-def load_instructions():
-    with open(INSTRUCTIONS_PATH, "r", encoding="utf-8") as file:
-        return file.read()
 
 
 # Internal OCR function (not exposed to the agent)
@@ -70,13 +59,10 @@ def extract_json_from_response(response: str) -> dict:
     return {"error": "No JSON found in agent response"}
 
 
+## DEFINIR QUERYPARAMS Y RENOMBRAR MAIN
 async def main():
-    # Load instructions
-    instructions = load_instructions()
-    if not instructions:
-        raise ValueError("Instructions file is empty or not found.")
+    instructions = load_instructions("payment_ocr_instructions")
 
-    # Initialize the agent
     agent = Agent(
         name="Payment Verifier",
         instructions=instructions,

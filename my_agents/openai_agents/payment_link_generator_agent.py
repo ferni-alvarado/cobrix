@@ -11,7 +11,7 @@ from agents import (
 )
 
 from my_agents.config import BACK_URLS, MODEL_NAME, TRACING_ENABLED, client
-from my_agents.openai_agents.mp.create_payment_link import create_mercadopago_preference
+from my_agents.openai_agents.mp.mercadopago_client import create_preference
 from my_agents.utils.instructions import load_instructions
 
 set_tracing_disabled(disabled=not TRACING_ENABLED)
@@ -35,7 +35,7 @@ def generate_payment_link(
         "pending": pending_url,
     }
 
-    result = create_mercadopago_preference(items, back_urls)
+    result = create_preference(items, back_urls)
 
     # Save the result for future verification
     output_dir = Path("data/payment_links")

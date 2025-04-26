@@ -1,5 +1,5 @@
 from backend.schemas.payments import MercadoPagoPaymentRequest, PaymentItem
-from my_agents.openai_agents.mp.create_payment_link import create_mercadopago_preference
+from my_agents.openai_agents.mp.mercadopago_client import create_preference
 
 
 def run_test():
@@ -29,7 +29,7 @@ def run_test():
         "pending": "https://example.com/pending",
     }
 
-    result = create_mercadopago_preference(items, back_urls)
+    result = create_preference(items, back_urls)
 
     print("✅ Result:")
     print(result)

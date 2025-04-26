@@ -57,19 +57,30 @@ def get_preference_by_id(preference_id: str) -> dict:
     Returns:
         dict: {
             'status': 'approved' | 'pending' | 'rejected' | 'unknown',
+            'payment_id': str,
             'preference_id': str,
             'last_update': str
         }
     """
     try:
-        response = sdk.preference().get(preference_id)
-        data = response.get("response", {})
+        search_result = sdk.payment().search({"external_reference": preference_id})
+        results = search_result.get("response", {}).get("results", [])
 
-        status = data.get("status", "unknown")
-        last_update = data.get("date_created", "unknown")
+        if not results:
+            return {
+                "preference_id": preference_id,
+                "status": "pending",
+                "last_update": "unknown",
+            }
+
+        payment = results[0]
+        status = payment.get("status", "unknown")
+        last_update = payment.get("date_last_updated", "unknown")
+        payment_id = payment.get("id", "unknown")
 
         return {
             "preference_id": preference_id,
+            "payment_id": payment_id,
             "status": status,
             "last_update": last_update,
         }

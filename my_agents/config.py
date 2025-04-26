@@ -17,3 +17,10 @@ client = openai.AsyncOpenAI(
 
 # Get model name from env (or default)
 MODEL_NAME = os.getenv("GITHUB_MODEL", "gpt-4o")
+
+
+BACK_URLS = {
+    "success": os.getenv("MP_SUCCESS_URL", "https://example.com/success"),
+    "failure": os.getenv("MP_FAILURE_URL", "https://example.com/failure"),
+    "pending": os.getenv("MP_PENDING_URL", "https://example.com/pending"),
+}

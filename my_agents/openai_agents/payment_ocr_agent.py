@@ -114,7 +114,3 @@ async def run_agent_with_receipt():
             json.dump(output_data, f, indent=2)
 
         print(f"✅ Saved: {output_file}")
-
-
-if __name__ == "__main__":
-    asyncio.run(main())

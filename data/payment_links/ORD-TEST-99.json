@@ -13,9 +13,9 @@
       "unit_price": 1800.0
     }
   ],
-  "preference_id": "182515349-6920c313-661f-462c-b185-ee5c6fe4ca8b",
-  "init_point": "https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=182515349-6920c313-661f-462c-b185-ee5c6fe4ca8b",
+  "preference_id": "182515349-25235b34-7b34-4289-8c6d-0c3ebb29ee8c",
+  "init_point": "https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=182515349-25235b34-7b34-4289-8c6d-0c3ebb29ee8c",
   "total_amount": 7800.0,
-  "timestamp": "2025-04-25T23:21:18.264421",
+  "timestamp": "2025-04-26T14:03:57.794085",
   "status": "pending"
 }

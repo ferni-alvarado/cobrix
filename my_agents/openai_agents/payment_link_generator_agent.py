@@ -62,9 +62,15 @@ def generate_payment_link(
 
 async def run_agent_with_order(order: dict):
     """
-    Executes the Payment Link Generator Agent with the provided order dictionary.
-    Returns the agent's response (which includes the init_point, preference_id, etc.).
+    Runs the Payment Link Generator Agent with an order dictionary.
+
+    Args:
+        order (dict): Dictionary containing order_id, payer_name, items, and optionally custom back URLs.
+
+    Returns:
+        dict: Payment link data including preference_id, init_point, total_amount, and status.
     """
+
     instructions = load_instructions("payment_link_generator")
 
     agent = Agent(

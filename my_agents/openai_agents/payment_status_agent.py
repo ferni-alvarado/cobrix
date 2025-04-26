@@ -21,7 +21,6 @@ def check_payment_status(preference_id: str) -> dict:
     return get_preference_by_id(preference_id)
 
 
-## MEJORAR QUERYPARAMS!
 async def run_agent_with_preference_id(preference_id: str):
     """
     Runs the Payment Status Checker Agent to verify the status of a payment via its preference ID.
@@ -44,7 +43,6 @@ async def run_agent_with_preference_id(preference_id: str):
 
     test_preference_id = "182515349-d317f980-fd6a-441c-9cb6-e66966b619c7"
 
-    # Probar con una preference ID real o simulada
     prompt = f"Check the payment status for preference ID: {preference_id}"
     result = await Runner.run(agent, prompt)
     print(result.final_output)

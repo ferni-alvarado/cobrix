@@ -30,9 +30,9 @@ def generate_payment_link(
     Generates a Mercado Pago payment link for a list of items and stores the preference ID with the order ID.
     """
     back_urls = {
-        "success": success_url,
-        "failure": failure_url,
-        "pending": pending_url,
+        "success": success_url or BACK_URLS["success"],
+        "failure": failure_url or BACK_URLS["failure"],
+        "pending": pending_url or BACK_URLS["pending"],
     }
 
     result = create_preference(items, back_urls)
@@ -83,10 +83,6 @@ async def run_agent_with_order(order: dict):
     Generate a Mercado Pago link for order ID '{order['order_id']}' made by {order['payer_name']}.
     Items:
     {items_str}
-    Use these URLs:
-    - success: {order['success_url']}
-    - failure: {order['failure_url']}
-    - pending: {order['pending_url']}
     """
 
     result = await Runner.run(agent, prompt)

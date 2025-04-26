@@ -1,5 +1,5 @@
 from backend.schemas.payments import MercadoPagoPaymentRequest, PaymentItem
-from my_agents.openai_agents.mp.mercadopago_client import create_preference
+from my_agents.openai_agents.tools.mercadopago_client import create_preference
 
 
 def run_test():

@@ -67,7 +67,7 @@ async def run_agent_with_receipt():
     Returns structured data or flags inconsistencies for human review.
     """
 
-    instructions = load_instructions("payment_ocr_instructions")
+    instructions = load_instructions("payment_ocr")
 
     agent = Agent(
         name="Payment Verifier",

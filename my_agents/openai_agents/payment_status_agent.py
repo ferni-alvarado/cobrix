@@ -32,7 +32,7 @@ async def run_agent_with_preference_id(preference_id: str):
         dict: Payment status data including 'status', 'last_update', and 'preference_id'.
     """
 
-    instructions = load_instructions("payment_status_instructions")
+    instructions = load_instructions("payment_status")
 
     agent = Agent(
         name="Payment Status Checker",
@@ -41,9 +41,6 @@ async def run_agent_with_preference_id(preference_id: str):
         tools=[check_payment_status],
     )
 
-    test_preference_id = "182515349-d317f980-fd6a-441c-9cb6-e66966b619c7"
-
     prompt = f"Check the payment status for preference ID: {preference_id}"
     result = await Runner.run(agent, prompt)
-    print(result.final_output)
     return result

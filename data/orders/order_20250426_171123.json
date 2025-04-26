@@ -1,0 +1,31 @@
+{
+  "validated_products": [
+    {
+      "name": "Coca-Cola",
+      "quantity": 2,
+      "unit_price": 900.0,
+      "subtotal": 1800.0
+    },
+    {
+      "name": "Empanada de carne",
+      "quantity": 3,
+      "unit_price": 500.0,
+      "subtotal": 1500.0
+    },
+    {
+      "name": "Helado 1/2 kilo",
+      "quantity": 1,
+      "unit_price": 2300.0,
+      "subtotal": 2300.0
+    }
+  ],
+  "not_found_products": [],
+  "out_of_stock_products": [],
+  "available_ice_cream_flavors": [
+    "Chocolate"
+  ],
+  "unavailable_ice_cream_flavors": [
+    "Maracuyá"
+  ],
+  "total_amount": 5600.0
+}

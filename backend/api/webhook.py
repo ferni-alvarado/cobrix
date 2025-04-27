@@ -10,4 +10,4 @@ router = APIRouter()
 async def webhook_handler(request: Request):
     payload = await request.json()
     await process_webhook_event(payload)
-    return JSONResponse(content={"message": "Webhook received successfully."})
+    return JSONResponse(content={"status": "received"}, status_code=200)

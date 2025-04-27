@@ -1,0 +1,17 @@
+{
+  "receipt_id": "IMG_1CD021075B86-1",
+  "image_path": "data/receipts/IMG_1CD021075B86-1.jpeg",
+  "structured_data": {
+    "transaction_date": "2025-04-19",
+    "transaction_time": "17:12:00",
+    "amount": "100.00",
+    "destination": "0000003100038454778725",
+    "operation_number": "3DSWGI2EJOYRAOJWIGXYVR",
+    "source_bank": "Naranja X",
+    "sender_info": "Macarena Julieta Barrios",
+    "confidence_score": 0.95,
+    "missing_fields": [],
+    "verification_result": "PENDING"
+  },
+  "raw_response": "Based on the raw text from the receipt, here's the extracted and structured payment information:\n\n```json\n{\n  \"transaction_date\": \"2025-04-19\",\n  \"transaction_time\": \"17:12:00\",\n  \"amount\": \"100.00\",\n  \"destination\": \"0000003100038454778725\",\n  \"operation_number\": \"3DSWGI2EJOYRAOJWIGXYVR\",\n  \"source_bank\": \"Naranja X\",\n  \"sender_info\": \"Macarena Julieta Barrios\",\n  \"confidence_score\": 0.95,\n  \"missing_fields\": [],\n  \"verification_result\": \"PENDING\"\n}\n```\n\n### Notes:\n- The amount is confirmed as \"$100.00\" (in ARS) based on the extracted receipt text.\n- The destination CVU (bank account identifier) \"0000003100038454778725\" is valid and matches the format.\n- The operation number is identified as \"3DSWGI2EJOYRAOJWIGXYVR\".\n- Source bank/payment method is identified as \"Naranja X\".\n- The sender's name, \"Macarena Julieta Barrios,\" was available from the receipt.\n- No fields are missing, and the provided data appears consistent.\n\nLet me know if further clarifications or actions are needed!"
+}

@@ -79,11 +79,12 @@ def process_order(products_requested: list, ice_cream_flavors_requested: list) -
     """
     # Convert dictionaries to Product objects
     product_objects = [Product(**item) for item in products_requested]
-
+    print(f"Products requested: {product_objects}")
     # Verify products and ice cream flavors
     product_verification = verify_order(product_objects)
     ice_cream_verification = verify_ice_cream_flavors(ice_cream_flavors_requested)
-
+    print(f"Ice cream flavors requested: {ice_cream_flavors_requested}")
+    print(f"Product verification result: {product_verification}")
     return {
         "product_verification": product_verification.model_dump(),
         "ice_cream_verification": ice_cream_verification.model_dump(),

@@ -216,31 +216,35 @@ class OrchestratorAgent:
             
             # Parse the JSON response
             order_json = extraction_response.choices[0].message.content
+            print(f"Extracted order JSON: {order_json}")
             order = json.loads(order_json)
-            
+            print(f"Parsed order: {order}")
             # Verify availability with the processing agent
             processed_order = await run_agent_with_order(order)
-            
+            print(f"Processed order: {processed_order}")
             # Check if there are products out of stock
-            if processed_order.get("product_verification", {}).get("out_of_stock", []):
+            if processed_order.get("not_found_products", []) or processed_order.get("out_of_stock_products", []):
+                print(f"Out of stock products: {processed_order['validated_products']['out_of_stock']}")
                 # Save pending order and mark that we're waiting for an alternative response
                 state["pending_order"] = processed_order
                 state["waiting_for_alternative"] = True
                 
                 # Build message offering alternatives
-                out_of_stock = processed_order["product_verification"]["out_of_stock"]
-                alternatives_msg = self._build_alternatives_message(out_of_stock)
+                not_found = processed_order.get("not_found_products", [])
+                out_of_stock = processed_order.get("out_of_stock_products", [])
+                alternatives_msg = self._build_alternatives_message(out_of_stock, not_found)
                 return alternatives_msg
             
+            print(f"All products in stock: {processed_order['validated_products']['products']}")
             # If everything is in stock, generate payment link
             payment_data = {
                 "order_id": processed_order["order_id"],
                 "payer_name": "Cliente",  # Ideally extracted from message or history
-                "items": self._convert_to_payment_items(processed_order["product_verification"]["products"])
+                "items": self._convert_to_payment_items(processed_order["validated_products"]["products"])
             }
-            
+            print(f"Payment data: {payment_data}")
             payment_link_result = await generate_payment_link(payment_data)
-            
+            print(f"Payment link result: {payment_link_result}")
             # Build response with payment link
             response = (
                 f"¡Gracias por tu pedido! Hemos confirmado todos los productos.\n\n"
@@ -271,7 +275,7 @@ class OrchestratorAgent:
             payment_data = {
                 "order_id": state["pending_order"]["order_id"],
                 "payer_name": "Cliente",
-                "items": self._convert_to_payment_items(state["pending_order"]["product_verification"]["products"])
+                "items": self._convert_to_payment_items(state["pending_order"]["validated_products"]["products"])
             }
             
             payment_link_result = await generate_payment_link(payment_data)

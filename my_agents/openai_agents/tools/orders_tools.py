@@ -13,6 +13,7 @@ def verify_order(products_requested: list[Product]) -> OrderVerificationResult:
     """
     Verify if the requested products are available in stock and calculate subtotals.
     """
+    print(f"Products requested: {products_requested}")
     df = pd.read_csv("data/products_inventory.csv")
     df["producto"] = df["producto"].str.lower()
 

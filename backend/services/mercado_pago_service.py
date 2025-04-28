@@ -3,6 +3,8 @@ import os
 import mercadopago
 from dotenv import load_dotenv
 
+from backend.services.websocket_manager import broadcast_payment_update
+
 load_dotenv()
 
 access_token = os.getenv("MERCADO_PAGO_ACCESS_TOKEN")
@@ -13,7 +15,7 @@ if not access_token:
 sdk = mercadopago.SDK(access_token)
 
 
-def create_preference(items: list, back_urls: dict):
+def create_preference(items: list, back_urls: dict) -> dict:
     """
     Create a Mercado Pago preference link from a list of items and back URLs.
 
@@ -25,12 +27,14 @@ def create_preference(items: list, back_urls: dict):
         dict: {'preference_id': str, 'init_point': str}
     """
 
+    print("Creating Mercado Pago preference...", items, back_urls)
+
     preference_data = {
         "items": items,
         "back_urls": back_urls,
         "auto_return": "approved",
+        "notification_url": "https://73b6-179-62-136-16.ngrok-free.app/webhook",
     }
-
     try:
         preference_response = sdk.preference().create(preference_data)
         response = preference_response.get("response", {})
@@ -45,12 +49,11 @@ def create_preference(items: list, back_urls: dict):
                 item["unit_price"] * item["quantity"] for item in items
             ),
         }
-
     except Exception as e:
         raise RuntimeError(f"Error creating Mercado Pago preference: {e}")
 
 
-def get_preference_by_id(preference_id: str) -> dict:
+def get_payment_status(preference_id: str) -> dict:
     """
     Get the status of a payment by preference ID.
 
@@ -62,6 +65,7 @@ def get_preference_by_id(preference_id: str) -> dict:
             'last_update': str
         }
     """
+
     try:
         search_result = sdk.payment().search({"external_reference": preference_id})
         results = search_result.get("response", {}).get("results", [])
@@ -74,17 +78,12 @@ def get_preference_by_id(preference_id: str) -> dict:
             }
 
         payment = results[0]
-        status = payment.get("status", "unknown")
-        last_update = payment.get("date_last_updated", "unknown")
-        payment_id = payment.get("id", "unknown")
-
         return {
             "preference_id": preference_id,
-            "payment_id": payment_id,
-            "status": status,
-            "last_update": last_update,
+            "payment_id": payment.get("id", "unknown"),
+            "status": payment.get("status", "unknown"),
+            "last_update": payment.get("date_last_updated", "unknown"),
         }
-
     except Exception as e:
         raise RuntimeError(f"Error retrieving payment status: {e}")
 
@@ -105,3 +104,28 @@ def search_preferences(filters: dict = {}) -> dict:
         return response.get("response", {})
     except Exception as e:
         raise RuntimeError(f"Error searching Mercado Pago preferences: {e}")
+
+
+async def process_webhook_event(payload: dict):
+    payment_id = payload["data"]["id"]
+    payment = sdk.payment().get(payment_id)["response"]
+
+    status = payment.get("status")
+    external_reference = payment.get("external_reference")
+    payer_email = payment.get("payer", {}).get("email")
+    total_amount = payment.get("transaction_amount")
+    delivery_mode = (
+        payment.get("additional_info", {})
+        .get("shipment", {})
+        .get("shipping_mode", "pickup")
+    )
+
+    await broadcast_payment_update(
+        {
+            "order_id": external_reference,
+            "payment_status": status,
+            "payer_email": payer_email,
+            "delivery_mode": delivery_mode,
+            "total_amount": total_amount,
+        }
+    )

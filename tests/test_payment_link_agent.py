@@ -23,12 +23,11 @@ async def run_test():
                 "unit_price": 1800.0,
             },
         ],
-        "success_url": "https://test.com/success",
-        "failure_url": "https://test.com/failure",
-        "pending_url": "https://test.com/pending",
     }
 
     result = await run_agent_with_order(test_order)
+
+    print("Result:", result)
 
     assert (
         "https://www.mercadopago.com" in result.final_output

@@ -323,37 +323,101 @@ class OrchestratorAgent:
     async def _handle_alternative_response(self, message: str, user_id: str) -> str:
         """Handle customer response when alternatives are offered due to stock issues"""
         state = self.conversation_state[user_id]
-        state["waiting_for_alternative"] = False
-
+        
         try:
-            # Here you would process the customer's response about the alternatives
-            # and update the pending order
-
-            # For simplicity, we assume the customer accepted the alternatives
-            # and proceed with payment
-
+            print("Handling alternative response...")
+            print(f"User message: {message}")
+            
+            # Clear the waiting for alternative flag regardless of what happens next
+            state["waiting_for_alternative"] = False
+            
+            # Keep the original order ID and validated products
+            original_order_id = state["pending_order"]["order_id"]
+            original_validated_products = state["pending_order"].get("validated_products", [])
+            
+            print(f"Original order ID: {original_order_id}")
+            print(f"Original validated products: {original_validated_products}")
+            
+            # Extract new products from the customer's response
+            extraction_response = await client.chat.completions.create(
+                model=MODEL_NAME,
+                messages=[
+                    {"role": "system", "content": """
+                    Extract the products and quantities from the following order, and return it in structured JSON format:
+                    {
+                        "products_requested": [
+                            {"name": "Product name", "quantity": quantity},
+                            ...
+                        ],
+                        "ice_cream_flavors_requested": ["flavor1", "flavor2", ...]
+                    }
+                    Just return the JSON, nothing else.
+                    """},
+                    {"role": "user", "content": f"Extract the products and quantities from the following order: {message}"}
+                ],
+                response_format={"type": "json_object"}
+            )
+            
+            # Parse the JSON response
+            order_json = extraction_response.choices[0].message.content
+            print(f"Extracted additional products JSON: {order_json}")
+            additional_order = json.loads(order_json)
+            print(f"Parsed additional products: {additional_order}")
+            
+            # Process just the new products
+            new_processed_order = await run_agent_with_order(additional_order)
+            print(f"New processed order: {new_processed_order}")
+            
+            # Check if the new products have issues
+            if new_processed_order.get("not_found_products", []) or new_processed_order.get("out_of_stock_products", []):
+                # Still have issues with the new order - offer alternatives again
+                state["pending_order"] = new_processed_order
+                state["waiting_for_alternative"] = True
+                
+                # Build message offering alternatives
+                not_found = new_processed_order.get("not_found_products", [])
+                out_of_stock = new_processed_order.get("out_of_stock_products", [])
+                alternatives_msg = self._build_alternatives_message(out_of_stock, not_found)
+                return alternatives_msg
+            
+            # Combine the original validated products with the new validated products
+            combined_validated_products = original_validated_products + new_processed_order.get("validated_products", [])
+            print(f"Combined validated products: {combined_validated_products}")
+            
+            # Calculate the combined total amount
+            combined_total = sum(product.get("subtotal", 0) for product in combined_validated_products)
+            
+            # Generate payment link for the combined order
             payment_data = {
-                "order_id": state["pending_order"]["order_id"],
+                "order_id": original_order_id,  # Keep the original order ID
                 "payer_name": "Cliente",
-                "items": self._convert_to_payment_items(
-                    state["pending_order"]["validated_products"]["products"]
-                ),
+                "items": self._convert_to_payment_items(combined_validated_products)
             }
-
+            
+            print(f"Payment data: {payment_data}")
             payment_link_result = await generate_payment_link(payment_data)
-
+            print(f"Payment link result: {payment_link_result}")
+            
+            # Format the list of products for the response
+            product_list = ""
+            for product in combined_validated_products:
+                product_list += f"- {product.get('name', 'Producto')}: ${product.get('subtotal', 0)}\n"
+            
             response = (
-                f"¡Gracias por confirmar los cambios! Hemos actualizado tu pedido.\n\n"
-                f"Total a pagar: ${payment_link_result['total_amount']}\n"
+                f"¡Perfecto! He actualizado tu pedido con los nuevos productos.\n\n"
+                f"Tu pedido ahora incluye:\n{product_list}\n"
+                f"Total a pagar: ${combined_total}\n"
                 f"Link de pago: {payment_link_result['init_point']}\n\n"
                 f"Una vez realizado el pago, te confirmaremos tu pedido."
             )
-
+            
             return response
+            
         except Exception as e:
+            import traceback
             print(f"Error handling alternative response: {e}")
+            print(traceback.format_exc())
             return "Lo siento, hubo un problema al actualizar tu pedido. ¿Podrías intentarlo de nuevo?"
-
     def _build_alternatives_message(self, out_of_stock: List, not_found: List) -> str:
         """Build a message offering alternatives for out-of-stock or not found products"""
         message = "Lo siento, pero algunos productos no están disponibles en este momento:\n\n"

@@ -6,8 +6,9 @@ from agents import (
     set_tracing_disabled,
 )
 
+# from my_agents.openai_agents.tools.mercadopago_client import get_preference_by_id
+from backend.services.mercado_pago_service import get_payment_status
 from my_agents.config import MODEL_NAME, TRACING_ENABLED, client
-from my_agents.openai_agents.tools.mercadopago_client import get_preference_by_id
 from my_agents.utils.instructions import load_instructions
 
 set_tracing_disabled(disabled=not TRACING_ENABLED)
@@ -18,7 +19,7 @@ def check_payment_status(preference_id: str) -> dict:
     """
     Given a Mercado Pago preference ID, returns its payment status.
     """
-    return get_preference_by_id(preference_id)
+    return get_payment_status(preference_id)
 
 
 async def run_agent_with_preference_id(preference_id: str):

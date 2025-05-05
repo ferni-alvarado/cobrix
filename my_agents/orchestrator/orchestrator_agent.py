@@ -290,7 +290,7 @@ class OrchestratorAgent:
                 return alternatives_msg
 
             print(
-                f"All products in stock: {processed_order['validated_products']['products']}"
+                f"All products in stock: {processed_order['validated_products']}"
             )
 
             # If everything is in stock, generate payment link

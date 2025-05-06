@@ -7,6 +7,8 @@ from backend.services.websocket_manager import broadcast_payment_update
 
 load_dotenv()
 
+BASE_URL = "https://47ab-179-62-136-16.ngrok-free.app"
+NOTIFICATION_URL = f"{BASE_URL.rstrip('/')}/webhook"
 access_token = os.getenv("MERCADO_PAGO_ACCESS_TOKEN")
 
 if not access_token:
@@ -33,7 +35,7 @@ def create_preference(items: list, back_urls: dict) -> dict:
         "items": items,
         "back_urls": back_urls,
         "auto_return": "approved",
-        "notification_url": "https://73b6-179-62-136-16.ngrok-free.app/webhook",
+        "notification_url": NOTIFICATION_URL,
     }
     try:
         preference_response = sdk.preference().create(preference_data)
@@ -107,25 +109,78 @@ def search_preferences(filters: dict = {}) -> dict:
 
 
 async def process_webhook_event(payload: dict):
-    payment_id = payload["data"]["id"]
-    payment = sdk.payment().get(payment_id)["response"]
+    try:
+        print(f"Received webhook payload: {payload}")
 
-    status = payment.get("status")
-    external_reference = payment.get("external_reference")
-    payer_email = payment.get("payer", {}).get("email")
-    total_amount = payment.get("transaction_amount")
-    delivery_mode = (
-        payment.get("additional_info", {})
-        .get("shipment", {})
-        .get("shipping_mode", "pickup")
-    )
+        # Caso 1: Es una notificación de tipo "payment"
+        if "data" in payload and "id" in payload.get("data", {}):
+            payment_id = payload["data"]["id"]
+            print(f"Procesando notificación de pago con ID: {payment_id}")
 
-    await broadcast_payment_update(
-        {
-            "order_id": external_reference,
-            "payment_status": status,
-            "payer_email": payer_email,
-            "delivery_mode": delivery_mode,
-            "total_amount": total_amount,
-        }
-    )
+            payment_response = sdk.payment().get(payment_id)
+            payment = payment_response["response"]
+
+            status = payment.get("status")
+            external_reference = payment.get("external_reference")
+            payer_email = payment.get("payer", {}).get("email")
+            total_amount = payment.get("transaction_amount")
+
+            update_data = {
+                "notification_type": "payment",
+                "payment_id": payment_id,
+                "order_id": external_reference,
+                "payment_status": status,
+                "payer_email": payer_email,
+                "total_amount": total_amount,
+            }
+
+            print(f"Datos de pago procesados: {update_data}")
+            await broadcast_payment_update(update_data)
+
+        # Caso 2: Es una notificación de tipo "merchant_order"
+        elif "topic" in payload and payload.get("topic") == "merchant_order":
+            merchant_order_id = payload.get("id")
+            print(
+                f"Procesando notificación de orden comercial con ID: {merchant_order_id}"
+            )
+
+            # Obtener detalles de la orden
+            merchant_response = sdk.merchant_order().get(merchant_order_id)
+            merchant_order = merchant_response["response"]
+
+            status = merchant_order.get("order_status")
+            external_reference = merchant_order.get("external_reference")
+            total_amount = merchant_order.get("total_amount")
+
+            update_data = {
+                "notification_type": "merchant_order",
+                "merchant_order_id": merchant_order_id,
+                "order_id": external_reference,
+                "order_status": status,
+                "total_amount": total_amount,
+            }
+
+            print(f"Datos de orden comercial procesados: {update_data}")
+            await broadcast_payment_update(update_data)
+
+        # Caso 3: Otro tipo de notificación
+        else:
+            print(f"Formato de notificación desconocido: {payload}")
+            # Simplemente registramos y no causamos error
+            await broadcast_payment_update(
+                {"notification_type": "unknown", "raw_data": str(payload)}
+            )
+
+    except Exception as e:
+        import traceback
+
+        traceback.print_exc()
+        print(f"Error procesando webhook: {str(e)}")
+        # Enviar notificación de error pero no interrumpir el flujo
+        await broadcast_payment_update(
+            {
+                "notification_type": "error",
+                "error_message": str(e),
+                "payload": str(payload),
+            }
+        )

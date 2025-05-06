@@ -1,7 +1,4 @@
-import asyncio
 import json
-import os
-import re
 from typing import Dict, List, Optional
 
 from dotenv import load_dotenv
@@ -198,10 +195,8 @@ class OrchestratorAgent:
         try:
             response = await client.chat.completions.create(
                 model=MODEL_NAME,
-                messages=[
-                    {"role": "system", "content": self.system_message},
-                    {"role": "user", "content": message},
-                ],
+                messages=[{"role": "system", "content": self.system_message}]
+                + self.conversation_state[user_id]["history"],
             )
             return response.choices[0].message.content
         except Exception as e:
@@ -213,10 +208,8 @@ class OrchestratorAgent:
         try:
             response = await client.chat.completions.create(
                 model=MODEL_NAME,
-                messages=[
-                    {"role": "system", "content": self.system_message},
-                    {"role": "user", "content": message},
-                ],
+                messages=[{"role": "system", "content": self.system_message}]
+                + self.conversation_state[user_id]["history"],
             )
             return response.choices[0].message.content
         except Exception as e:

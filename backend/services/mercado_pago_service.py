@@ -7,21 +7,33 @@ from backend.services.websocket_manager import broadcast_payment_update
 
 load_dotenv()
 
-BASE_URL = "https://47ab-179-62-136-16.ngrok-free.app"
-NOTIFICATION_URL = f"{BASE_URL.rstrip('/')}/webhook"
-access_token = os.getenv("MERCADO_PAGO_ACCESS_TOKEN")
+# Configuración flexible de URLs para desarrollo y producción
+# En producción, establecer la variable BASE_URL al dominio real de tu aplicación
+# En desarrollo, puedes usar ngrok o una solución similar
+BASE_URL = os.getenv("BASE_URL", "http://localhost:8000")
+WEBHOOK_PATH = os.getenv("WEBHOOK_PATH", "/webhook")
+NOTIFICATION_URL = f"{BASE_URL.rstrip('/')}{WEBHOOK_PATH}"
 
+# Para modo desarrollo con ngrok, podemos usar una URL específica que sobrescriba la BASE_URL
+NGROK_URL = os.getenv("NGROK_URL", None)
+if NGROK_URL:
+    NOTIFICATION_URL = f"{NGROK_URL.rstrip('/')}{WEBHOOK_PATH}"
+
+print(f"Usando URL para notificaciones de Mercado Pago: {NOTIFICATION_URL}")
+
+access_token = os.getenv("MERCADO_PAGO_ACCESS_TOKEN")
 if not access_token:
     raise EnvironmentError("MERCADO_PAGO_ACCESS_TOKEN is missing in .env file")
 
 sdk = mercadopago.SDK(access_token)
 
 
-def create_preference(items: list, back_urls: dict) -> dict:
+def create_preference(order_id, items: list, back_urls: dict) -> dict:
     """
     Create a Mercado Pago preference link from a list of items and back URLs.
 
     Args:
+        order_id (str): Unique identifier for the order
         items (list): list of dicts, each with 'id', 'title', 'quantity', 'unit_price', and optionally 'currency_id'
         back_urls (dict): dict with 'success', 'failure', and 'pending' URLs
 
@@ -32,6 +44,7 @@ def create_preference(items: list, back_urls: dict) -> dict:
     print("Creating Mercado Pago preference...", items, back_urls)
 
     preference_data = {
+        "external_reference": order_id,
         "items": items,
         "back_urls": back_urls,
         "auto_return": "approved",
@@ -109,6 +122,13 @@ def search_preferences(filters: dict = {}) -> dict:
 
 
 async def process_webhook_event(payload: dict):
+    """
+    Process webhook events from Mercado Pago.
+    Handles both payment and merchant_order notifications.
+
+    Args:
+        payload (dict): The webhook payload
+    """
     try:
         print(f"Received webhook payload: {payload}")
 
@@ -122,16 +142,30 @@ async def process_webhook_event(payload: dict):
 
             status = payment.get("status")
             external_reference = payment.get("external_reference")
-            payer_email = payment.get("payer", {}).get("email")
             total_amount = payment.get("transaction_amount")
 
+            # Obtener información del pagador
+            payer = payment.get("payer", {})
+            payer_name = (
+                f"{payer.get('first_name', '')} {payer.get('last_name', '')}".strip()
+            )
+
+            # Obtener número de teléfono si está disponible
+            phone = payer.get("phone", {})
+            area_code = phone.get("area_code", "")
+            number = phone.get("number", "")
+            full_phone_number = f"{area_code}{number}" if area_code and number else ""
+
             update_data = {
+                "event": "payment_update",
                 "notification_type": "payment",
                 "payment_id": payment_id,
                 "order_id": external_reference,
                 "payment_status": status,
-                "payer_email": payer_email,
+                "status": status,
                 "total_amount": total_amount,
+                "payer_name": payer_name,
+                "payer_phone_number": full_phone_number,
             }
 
             print(f"Datos de pago procesados: {update_data}")
@@ -139,28 +173,14 @@ async def process_webhook_event(payload: dict):
 
         # Caso 2: Es una notificación de tipo "merchant_order"
         elif "topic" in payload and payload.get("topic") == "merchant_order":
-            merchant_order_id = payload.get("id")
-            print(
-                f"Procesando notificación de orden comercial con ID: {merchant_order_id}"
-            )
-
-            # Obtener detalles de la orden
-            merchant_response = sdk.merchant_order().get(merchant_order_id)
-            merchant_order = merchant_response["response"]
-
-            status = merchant_order.get("order_status")
-            external_reference = merchant_order.get("external_reference")
-            total_amount = merchant_order.get("total_amount")
+            merchant_resource = payload.get("resource")
 
             update_data = {
+                "event": "payment_update",
                 "notification_type": "merchant_order",
-                "merchant_order_id": merchant_order_id,
-                "order_id": external_reference,
-                "order_status": status,
-                "total_amount": total_amount,
+                "url": merchant_resource,
             }
 
-            print(f"Datos de orden comercial procesados: {update_data}")
             await broadcast_payment_update(update_data)
 
         # Caso 3: Otro tipo de notificación

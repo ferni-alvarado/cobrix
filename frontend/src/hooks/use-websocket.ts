@@ -1,8 +1,8 @@
-import { useContext } from "react";
-import { WebSocketContext } from "../src/context/websocket-ctx";
+import React from "react";
+import { WebSocketContext } from "../context/websocket-ctx";
 
 export const useWebSocket = () => {
-  const context = useContext(WebSocketContext);
+  const context = React.useContext(WebSocketContext);
   if (!context) {
     throw new Error("useWebSocket must be used within a WebSocketProvider");
   }

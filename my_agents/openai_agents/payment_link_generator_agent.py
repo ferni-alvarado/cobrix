@@ -102,27 +102,28 @@ async def run_agent_with_order(order: dict):
 
     # Extract the payment link data from the result
     try:
-        # Check if there's JSON in the final output        
+        # Check if there's JSON in the final output
         # Try to extract JSON from the response
-        json_match = re.search(r'```json\s+(.*?)\s+```', result.final_output, re.DOTALL) 
+        json_match = re.search(r"```json\s+(.*?)\s+```", result.final_output, re.DOTALL)
         if json_match:
             # Extract structured data from JSON code block
             payment_data = json.loads(json_match.group(1))
         else:
             # Try to parse the entire final output as JSON
             payment_data = json.loads(result.final_output)
-            
+
         print(f"📊 Extracted payment data: {payment_data}")
         return payment_data
-        
+
     except Exception as e:
         print(f"❌ Error extracting payment data: {e}")
         # Fallback: Return a minimal structure with essential info
         return {
             "order_id": order["order_id"],
             "init_point": "#link-unavailable",
-            "total_amount": sum(item["unit_price"] * item["quantity"] for item in order["items"]),
+            "total_amount": sum(
+                item["unit_price"] * item["quantity"] for item in order["items"]
+            ),
             "status": "error",
-            "error_message": str(e)
+            "error_message": str(e),
         }
-    

@@ -7,7 +7,7 @@ from backend.services.websocket_manager import broadcast_payment_update
 
 load_dotenv()
 
-BASE_URL = "https://47ab-179-62-136-16.ngrok-free.app"
+BASE_URL = "https://094c-179-62-95-234.ngrok-free.app"
 NOTIFICATION_URL = f"{BASE_URL.rstrip('/')}/webhook"
 access_token = os.getenv("MERCADO_PAGO_ACCESS_TOKEN")
 
@@ -17,7 +17,7 @@ if not access_token:
 sdk = mercadopago.SDK(access_token)
 
 
-def create_preference(items: list, back_urls: dict) -> dict:
+def create_preference(items: list, back_urls: dict, order_id: str) -> dict:
     """
     Create a Mercado Pago preference link from a list of items and back URLs.
 
@@ -35,6 +35,7 @@ def create_preference(items: list, back_urls: dict) -> dict:
         "items": items,
         "back_urls": back_urls,
         "auto_return": "approved",
+        "external_reference": order_id,
         "notification_url": NOTIFICATION_URL,
     }
     try:

@@ -11,6 +11,8 @@ from my_agents.openai_agents.payment_link_generator_agent import (
     run_agent_with_order as generate_payment_link,
 )
 from my_agents.utils.instructions import load_instructions
+# NUEVO: Importar el StateManager
+from my_agents.utils.state_manager import StateManager
 
 # Load environment variables
 load_dotenv()
@@ -58,8 +60,9 @@ class OrchestratorAgent:
             an attentive and helpful employee of the business.
             """
 
-        # Conversation state (could be moved to a DB like Redis for persistence)
-        self.conversation_state = {}
+        # NUEVO: Usar StateManager en lugar de conversation_state
+        self.state_manager = StateManager.get_instance()
+        # ELIMINAR: self.conversation_state = {}
 
     async def handle_message(self, message: str, user_id: str) -> str:
         """
@@ -72,17 +75,18 @@ class OrchestratorAgent:
         Returns:
             The response to send to the user
         """
-        # Initialize state if new user
-        if user_id not in self.conversation_state:
-            self.conversation_state[user_id] = {
-                "context": "initial",
-                "pending_order": None,
-                "waiting_for_alternative": False,
-                "history": [],  # Simple message history
-            }
+        # MODIFICADO: Obtener estado del StateManager
+        state = self.state_manager.get_state(user_id)
+        
+        # NUEVO: Verificar notificaciones pendientes
+        if state.get("should_notify_payment"):
+            notification_message = state.get("notification_message", "Tu pago ha sido procesado.")
+            # Limpiar la notificación para no mostrarla nuevamente
+            state["should_notify_payment"] = False
+            self.state_manager.update_state(user_id, state)
+            return notification_message
 
         # Save message in history
-        state = self.conversation_state[user_id]
         state["history"].append({"role": "user", "content": message})
 
         # Classify message intent
@@ -101,6 +105,10 @@ class OrchestratorAgent:
 
         # Save response in history
         state["history"].append({"role": "assistant", "content": response})
+        
+        # NUEVO: Actualizar el estado
+        self.state_manager.update_state(user_id, state)
+        
         return response
 
     async def _classify_intent(self, message: str) -> str:
@@ -193,7 +201,7 @@ class OrchestratorAgent:
             # Fallback to "other" if there's an error
             return "other"
 
-    async def _handle_greeting(self, message: str, user_id: str) -> str:
+    async def _handle_greeting(self, message: str, user_id: str = None) -> str:
         """Handle user greetings"""
         try:
             response = await client.chat.completions.create(
@@ -208,7 +216,7 @@ class OrchestratorAgent:
             print(f"Error handling greeting: {e}")
             return "¡Hola! ¿En qué puedo ayudarte hoy? 😊"
 
-    async def _handle_query(self, message: str, user_id: str) -> str:
+    async def _handle_query(self, message: str, user_id: str = None) -> str:
         """Handle general queries"""
         try:
             response = await client.chat.completions.create(
@@ -225,7 +233,8 @@ class OrchestratorAgent:
 
     async def _handle_order(self, message: str, user_id: str) -> str:
         """Handle orders, verify stock and generate payment links"""
-        state = self.conversation_state[user_id]
+        # MODIFICADO: Obtener estado del StateManager
+        state = self.state_manager.get_state(user_id)
 
         # If we're waiting for a response for alternatives
         if state["waiting_for_alternative"]:
@@ -279,9 +288,11 @@ class OrchestratorAgent:
                 # Save pending order and mark that we're waiting for an alternative response
                 state["pending_order"] = processed_order
                 state["waiting_for_alternative"] = True
+                
+                # NUEVO: Actualizar el estado
+                self.state_manager.update_state(user_id, state)
 
                 # Build message offering alternatives
-
                 not_found = processed_order.get("not_found_products", [])
                 out_of_stock = processed_order.get("out_of_stock_products", [])
                 alternatives_msg = self._build_alternatives_message(
@@ -295,11 +306,26 @@ class OrchestratorAgent:
                 "payer_name": "Cliente",  # Ideally extracted from message or history
                 "items": self._convert_to_payment_items(
                     processed_order["validated_products"]
-                ),  ## fix
+                ),
             }
             print(f"Payment data: {payment_data}")
             payment_link_result = await generate_payment_link(payment_data)
             print(f"Payment link result: {payment_link_result}")
+            
+            # NUEVO: Registrar el pedido en el StateManager
+            if payment_link_result and "preference_id" in payment_link_result:
+                # Guardar el pedido en el estado
+                state["pending_order"] = payment_link_result
+                
+                # Registrar la asociación de IDs
+                self.state_manager.register_order(
+                    user_id=user_id,
+                    order_id=payment_link_result["order_id"],
+                    preference_id=payment_link_result["preference_id"]
+                )
+                
+                # Actualizar el estado
+                self.state_manager.update_state(user_id, state)
 
             # Build response with payment link
             response = (
@@ -317,7 +343,8 @@ class OrchestratorAgent:
 
     async def _handle_alternative_response(self, message: str, user_id: str) -> str:
         """Handle customer response when alternatives are offered due to stock issues"""
-        state = self.conversation_state[user_id]
+        # MODIFICADO: Obtener estado del StateManager
+        state = self.state_manager.get_state(user_id)
 
         try:
             print("Handling alternative response...")
@@ -325,6 +352,9 @@ class OrchestratorAgent:
 
             # Clear the waiting for alternative flag regardless of what happens next
             state["waiting_for_alternative"] = False
+            
+            # NUEVO: Actualizar el estado temprano
+            self.state_manager.update_state(user_id, state)
 
             # Keep the original order ID and validated products
             original_order_id = state["pending_order"]["order_id"]
@@ -422,6 +452,21 @@ class OrchestratorAgent:
                 f"Link de pago: {payment_link_result['init_point']}\n\n"
                 f"Una vez realizado el pago, te confirmaremos tu pedido."
             )
+
+            # NUEVO: Registrar el pedido actualizado
+            if payment_link_result and "preference_id" in payment_link_result:
+                # Actualizar el pedido en el estado
+                state["pending_order"] = payment_link_result
+                
+                # Actualizar la asociación de IDs
+                self.state_manager.register_order(
+                    user_id=user_id,
+                    order_id=payment_link_result["order_id"],
+                    preference_id=payment_link_result["preference_id"]
+                )
+                
+                # Actualizar el estado
+                self.state_manager.update_state(user_id, state)
 
             return response
 

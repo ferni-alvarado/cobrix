@@ -59,7 +59,7 @@ def generate_payment_link(
     Generates a Mercado Pago payment link for a list of items and stores the preference ID with the order ID.
     """
     back_urls = BACK_URLS
-    preference = create_preference(order_id, items, back_urls)
+    preference = create_preference(items, back_urls, order_id)
     output_data = build_output_data(order_id, payer_name, items, preference)
     save_output_to_file(order_id, output_data)
     return output_data

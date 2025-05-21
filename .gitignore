@@ -174,4 +174,4 @@ cython_debug/
 .pypirc
 
 # Other files
-data/receipts/
+data/

@@ -28,7 +28,7 @@ if not access_token:
 sdk = mercadopago.SDK(access_token)
 
 
-def create_preference(order_id, items: list, back_urls: dict) -> dict:
+def create_preference(items: list, back_urls: dict, order_id: str) -> dict:
     """
     Create a Mercado Pago preference link from a list of items and back URLs.
 
@@ -48,6 +48,7 @@ def create_preference(order_id, items: list, back_urls: dict) -> dict:
         "items": items,
         "back_urls": back_urls,
         "auto_return": "approved",
+        "external_reference": order_id,
         "notification_url": NOTIFICATION_URL,
     }
     try:

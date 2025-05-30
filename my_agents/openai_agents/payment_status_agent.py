@@ -6,7 +6,7 @@ from agents import (
     set_tracing_disabled,
 )
 
-from my_agents.config import MODEL_NAME, TRACING_ENABLED, client
+from my_agents.core.config import MODEL_NAME, TRACING_ENABLED, client
 from my_agents.openai_agents.tools.mercadopago_client import get_preference_by_id
 from my_agents.utils.instructions import load_instructions
 

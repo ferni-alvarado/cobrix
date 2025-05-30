@@ -3,19 +3,19 @@ from typing import Dict, List, Optional
 
 from dotenv import load_dotenv
 
+# NUEVO: Importar el StateManager
+from my_agents.core.state_manager import StateManager
 from my_agents.openai_agents.order_processing_agent import run_agent_with_order
 from my_agents.openai_agents.payment_link_generator_agent import (
     run_agent_with_order as generate_payment_link,
 )
 from my_agents.utils.instructions import load_instructions
-# NUEVO: Importar el StateManager
-from my_agents.utils.state_manager import StateManager
 
 # Load environment variables
 load_dotenv()
 
 # Import the client from your config
-from my_agents.config import MODEL_NAME, client
+from my_agents.core.config import MODEL_NAME, client
 
 
 class OrchestratorAgent:
@@ -74,10 +74,12 @@ class OrchestratorAgent:
         """
         # MODIFICADO: Obtener estado del StateManager
         state = self.state_manager.get_state(user_id)
-        
+
         # NUEVO: Verificar notificaciones pendientes
         if state.get("should_notify_payment"):
-            notification_message = state.get("notification_message", "Tu pago ha sido procesado.")
+            notification_message = state.get(
+                "notification_message", "Tu pago ha sido procesado."
+            )
             # Limpiar la notificación para no mostrarla nuevamente
             state["should_notify_payment"] = False
             self.state_manager.update_state(user_id, state)
@@ -102,10 +104,10 @@ class OrchestratorAgent:
 
         # Save response in history
         state["history"].append({"role": "assistant", "content": response})
-        
+
         # NUEVO: Actualizar el estado
         self.state_manager.update_state(user_id, state)
-        
+
         return response
 
     async def _classify_intent(self, message: str) -> str:
@@ -281,7 +283,7 @@ class OrchestratorAgent:
                 # Save pending order and mark that we're waiting for an alternative response
                 state["pending_order"] = processed_order
                 state["waiting_for_alternative"] = True
-                
+
                 # NUEVO: Actualizar el estado
                 self.state_manager.update_state(user_id, state)
 
@@ -304,19 +306,19 @@ class OrchestratorAgent:
             print(f"Payment data: {payment_data}")
             payment_link_result = await generate_payment_link(payment_data)
             print(f"Payment link result: {payment_link_result}")
-            
+
             # NUEVO: Registrar el pedido en el StateManager
             if payment_link_result and "preference_id" in payment_link_result:
                 # Guardar el pedido en el estado
                 state["pending_order"] = payment_link_result
-                
+
                 # Registrar la asociación de IDs
                 self.state_manager.register_order(
                     user_id=user_id,
                     order_id=payment_link_result["order_id"],
-                    preference_id=payment_link_result["preference_id"]
+                    preference_id=payment_link_result["preference_id"],
                 )
-                
+
                 # Actualizar el estado
                 self.state_manager.update_state(user_id, state)
 
@@ -345,7 +347,7 @@ class OrchestratorAgent:
 
             # Clear the waiting for alternative flag regardless of what happens next
             state["waiting_for_alternative"] = False
-            
+
             # NUEVO: Actualizar el estado temprano
             self.state_manager.update_state(user_id, state)
 
@@ -450,14 +452,14 @@ class OrchestratorAgent:
             if payment_link_result and "preference_id" in payment_link_result:
                 # Actualizar el pedido en el estado
                 state["pending_order"] = payment_link_result
-                
+
                 # Actualizar la asociación de IDs
                 self.state_manager.register_order(
                     user_id=user_id,
                     order_id=payment_link_result["order_id"],
-                    preference_id=payment_link_result["preference_id"]
+                    preference_id=payment_link_result["preference_id"],
                 )
-                
+
                 # Actualizar el estado
                 self.state_manager.update_state(user_id, state)
 

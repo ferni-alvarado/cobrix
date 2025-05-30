@@ -10,19 +10,19 @@ load_dotenv(override=True)
 TRACING_ENABLED = os.getenv("TRACING", "false").lower() == "true"
 
 # Setup OpenAI client (usando la API oficial, no GitHub ni Azure)
-# client = openai.AsyncOpenAI(api_key=os.environ["OPENAI_API_KEY"])
+client = openai.AsyncOpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
 MODEL_NAME = os.getenv("OPENAI_MODEL", "gpt-4o")
 
 
 # Setup OpenAI client for GitHub Models
-client = openai.AsyncOpenAI(
-    base_url="https://models.inference.ai.azure.com",
-    api_key=os.environ["GITHUB_TOKEN"],
-)
+# client = openai.AsyncOpenAI(
+#  base_url="https://models.inference.ai.azure.com",
+#   api_key=os.environ["GITHUB_TOKEN"],
+# )
 
 # Get model name from env (or default)
-MODEL_NAME_GITHUB_MODELS = os.getenv("GITHUB_MODEL", "gpt-4o")
+# MODEL_NAME_GITHUB_MODELS = os.getenv("GITHUB_MODEL", "gpt-4o")
 
 
 BACK_URLS = {

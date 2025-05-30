@@ -12,7 +12,7 @@ from agents import (
 )
 
 from backend.schemas.orders import Product
-from my_agents.config import MODEL_NAME, TRACING_ENABLED, client
+from my_agents.core.config import MODEL_NAME, TRACING_ENABLED, client
 from my_agents.openai_agents.tools.orders_tools import (
     verify_ice_cream_flavors,
     verify_order,

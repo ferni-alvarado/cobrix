@@ -12,7 +12,7 @@ from agents import (
 )
 
 from backend.services.mercado_pago_service import create_preference
-from my_agents.config import BACK_URLS, MODEL_NAME, TRACING_ENABLED, client
+from my_agents.core.config import BACK_URLS, MODEL_NAME, TRACING_ENABLED, client
 from my_agents.utils.instructions import load_instructions
 
 set_tracing_disabled(disabled=not TRACING_ENABLED)

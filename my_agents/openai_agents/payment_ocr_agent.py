@@ -13,7 +13,7 @@ from agents import (
     set_tracing_disabled,
 )
 
-from my_agents.config import MODEL_NAME, TRACING_ENABLED, client
+from my_agents.core.config import MODEL_NAME, TRACING_ENABLED, client
 from my_agents.utils.instructions import load_instructions
 
 set_tracing_disabled(disabled=not TRACING_ENABLED)

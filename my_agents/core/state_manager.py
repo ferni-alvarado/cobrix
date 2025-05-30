@@ -2,7 +2,7 @@ import json
 import os
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Optional, Any
+from typing import Any, Dict, Optional
 
 
 class StateManager:
@@ -10,6 +10,7 @@ class StateManager:
     Gestor centralizado del estado de conversaciones y pedidos.
     Implementa el patrón Singleton para acceso global.
     """
+
     _instance = None
     _conversation_states: Dict[str, Dict] = {}
     _preference_mapping: Dict[str, str] = {}  # Mapeo entre preference_id y user_id
@@ -34,17 +35,19 @@ class StateManager:
         """Carga el estado desde archivos persistentes"""
         # Crear directorio si no existe
         self._data_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # Cargar estados de conversación
         state_file = self._data_dir / "conversation_states.json"
         if state_file.exists():
             try:
                 with open(state_file, "r", encoding="utf-8") as f:
                     self._conversation_states = json.load(f)
-                print(f"🔄 Estados de conversación cargados: {len(self._conversation_states)} conversaciones")
+                print(
+                    f"🔄 Estados de conversación cargados: {len(self._conversation_states)} conversaciones"
+                )
             except Exception as e:
                 print(f"⚠️ Error cargando estados de conversación: {e}")
-        
+
         # Cargar mapeos de IDs
         mapping_file = self._data_dir / "id_mappings.json"
         if mapping_file.exists():
@@ -53,7 +56,9 @@ class StateManager:
                     mappings = json.load(f)
                     self._preference_mapping = mappings.get("preference_mapping", {})
                     self._order_mapping = mappings.get("order_mapping", {})
-                print(f"🔄 Mapeos cargados: {len(self._preference_mapping)} preferencias, {len(self._order_mapping)} órdenes")
+                print(
+                    f"🔄 Mapeos cargados: {len(self._preference_mapping)} preferencias, {len(self._order_mapping)} órdenes"
+                )
             except Exception as e:
                 print(f"⚠️ Error cargando mapeos de IDs: {e}")
 
@@ -66,13 +71,13 @@ class StateManager:
                 json.dump(self._conversation_states, f, ensure_ascii=False, indent=2)
         except Exception as e:
             print(f"⚠️ Error guardando estados de conversación: {e}")
-        
+
         # Guardar mapeos de IDs
         mapping_file = self._data_dir / "id_mappings.json"
         try:
             mappings = {
                 "preference_mapping": self._preference_mapping,
-                "order_mapping": self._order_mapping
+                "order_mapping": self._order_mapping,
             }
             with open(mapping_file, "w", encoding="utf-8") as f:
                 json.dump(mappings, f, ensure_ascii=False, indent=2)
@@ -89,10 +94,10 @@ class StateManager:
                 "order_history": [],
                 "waiting_for_alternative": False,
                 "history": [],
-                "last_updated": datetime.now().isoformat()
+                "last_updated": datetime.now().isoformat(),
             }
             self._save_state()
-        
+
         return self._conversation_states[user_id]
 
     def update_state(self, user_id: str, state: Dict):
@@ -107,19 +112,21 @@ class StateManager:
         self._order_mapping[order_id] = user_id
         if preference_id:
             self._preference_mapping[preference_id] = user_id
-        
+
         # Guardar cambios
         self._save_state()
 
-    def update_payment_status(self, preference_id: str, status: str, metadata: Optional[Dict] = None) -> bool:
+    def update_payment_status(
+        self, preference_id: str, status: str, metadata: Optional[Dict] = None
+    ) -> bool:
         """
         Actualiza el estado de pago para un pedido identificado por preference_id.
-        
+
         Args:
             preference_id: ID de preferencia de Mercado Pago
             status: Nuevo estado (approved, pending, rejected, etc.)
             metadata: Información adicional sobre el pago
-            
+
         Returns:
             bool: True si se actualizó correctamente, False si no se encontró
         """
@@ -128,40 +135,45 @@ class StateManager:
         if not user_id:
             print(f"⚠️ No se encontró usuario para preference_id: {preference_id}")
             return False
-            
+
         # Obtener el estado actual del usuario
         state = self._conversation_states.get(user_id, {})
         pending_order = state.get("pending_order", {})
-        
+
         # Verificar que el pedido existe y coincide
         if not pending_order or pending_order.get("preference_id") != preference_id:
-            print(f"⚠️ No se encontró un pedido pendiente con preference_id: {preference_id}")
+            print(
+                f"⚠️ No se encontró un pedido pendiente con preference_id: {preference_id}"
+            )
             return False
-            
+
         # Actualizar el estado del pedido
         pending_order["status"] = status
         pending_order["payment_updated_at"] = datetime.now().isoformat()
-        
+
         # Añadir metadatos si fueron proporcionados
         if metadata:
             if not pending_order.get("payment_metadata"):
                 pending_order["payment_metadata"] = {}
             pending_order["payment_metadata"].update(metadata)
-        
+
         # Marcar que debe notificar en la próxima interacción
         state["should_notify_payment"] = True
         state["notification_message"] = self._get_payment_notification_message(status)
-        
+
         # Guardar en el historial si está aprobado
-        if status == "approved" and not any(order.get("order_id") == pending_order.get("order_id") for order in state.get("order_history", [])):
+        if status == "approved" and not any(
+            order.get("order_id") == pending_order.get("order_id")
+            for order in state.get("order_history", [])
+        ):
             if not state.get("order_history"):
                 state["order_history"] = []
-            
+
             # Crear copia del pedido para el historial
             order_copy = pending_order.copy()
             order_copy["completed_at"] = datetime.now().isoformat()
             state["order_history"].append(order_copy)
-        
+
         # Actualizar el estado y guardar
         self._conversation_states[user_id] = state
         self._save_state()
@@ -191,17 +203,17 @@ class StateManager:
         user_id = self._order_mapping.get(order_id)
         if not user_id:
             return None
-            
+
         state = self._conversation_states.get(user_id, {})
-        
+
         # Verificar pedido pendiente actual
         pending = state.get("pending_order", {})
         if pending and pending.get("order_id") == order_id:
             return pending
-        
+
         # Buscar en historial
         for order in state.get("order_history", []):
             if order.get("order_id") == order_id:
                 return order
-                
+
         return None

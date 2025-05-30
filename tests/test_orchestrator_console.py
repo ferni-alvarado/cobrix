@@ -22,7 +22,7 @@ os.makedirs(os.path.join(project_root, "data", "receipts"), exist_ok=True)
 
 from dotenv import load_dotenv
 
-from my_agents.orchestrator.orchestrator_agent import OrchestratorAgent
+from my_agents.orchestrator.orchestrator_agent2 import OrchestratorAgent
 
 
 # Console formatting configuration

@@ -44,7 +44,6 @@ def create_preference(items: list, back_urls: dict, order_id: str) -> dict:
     print("Creating Mercado Pago preference...", items, back_urls)
 
     preference_data = {
-        "external_reference": order_id,
         "items": items,
         "back_urls": back_urls,
         "auto_return": "approved",
@@ -168,9 +167,39 @@ async def process_webhook_event(payload: dict):
                 "payer_name": payer_name,
                 "payer_phone_number": full_phone_number,
             }
+            # NUEVO: Actualizar el estado en el StateManager
+            if external_reference and status:
+                from my_agents.core.state_manager import StateManager
+                
+                state_manager = StateManager.get_instance()
+                
+                # Buscar preference_id a partir del order_id
+                print(f"🔍 Buscando preference_id para order_id: {external_reference}")
+                for pref_id, user_id in state_manager._preference_mapping.items():
+                    user_state = state_manager.get_state(user_id)
+                    if user_state.get("pending_order") and user_state["pending_order"].get("order_id") == external_reference:
+                        preference_id = user_state["pending_order"].get("preference_id")
+                        print(f"🔍 Encontrado preference_id: {preference_id} para order_id: {external_reference}")
+                        
+                        # Actualizar el estado del pago
+                        success = state_manager.update_payment_status(
+                            preference_id, 
+                            status,
+                            {
+                                "payment_id": payment_id,
+                                "total_amount": total_amount
+                            }
+                        )
+                        print(f"🔍 Resultado detallado de update_payment_status: {success}")
+                        if success:
+                            print(f"✅ Estado actualizado para orden: {external_reference}, status: {status}")
+                        else:
+                            print(f"⚠️ No se pudo actualizar el estado para orden: {external_reference}")
+                        
+                        break
 
-            print(f"Datos de pago procesados: {update_data}")
             await broadcast_payment_update(update_data)
+
 
         # Caso 2: Es una notificación de tipo "merchant_order"
         elif "topic" in payload and payload.get("topic") == "merchant_order":

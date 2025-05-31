@@ -51,6 +51,7 @@ class OrchestratorAgent:
 
         # Check for pending payment notifications
         if state.get("should_notify_payment"):
+            print(f"🔍 Notificación de pago pendiente encontrada para user_id: {user_id}")
             return self._handle_payment_notification(user_id, state)
 
         # Save message in history

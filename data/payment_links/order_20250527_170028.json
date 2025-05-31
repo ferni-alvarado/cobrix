@@ -1,0 +1,16 @@
+{
+  "order_id": "order_20250527_170028",
+  "payer_name": "Cliente",
+  "items": [
+    {
+      "title": "fanta",
+      "quantity": 1,
+      "unit_price": 850.0
+    }
+  ],
+  "preference_id": "251034633-b26b920a-df8c-4f07-bb3c-2b0293720b5b",
+  "init_point": "https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=251034633-b26b920a-df8c-4f07-bb3c-2b0293720b5b",
+  "total_amount": 850.0,
+  "timestamp": "2025-05-27T17:00:30.635274",
+  "status": "pending"
+}

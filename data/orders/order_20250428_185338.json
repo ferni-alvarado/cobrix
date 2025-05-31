@@ -1,0 +1,17 @@
+{
+  "validated_products": [
+    {
+      "name": "empanada de carne",
+      "quantity": 1,
+      "unit_price": 500.0,
+      "subtotal": 500.0
+    }
+  ],
+  "not_found_products": [
+    "coca"
+  ],
+  "out_of_stock_products": [],
+  "available_ice_cream_flavors": [],
+  "unavailable_ice_cream_flavors": [],
+  "total_amount": 500.0
+}

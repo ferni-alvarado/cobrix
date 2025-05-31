@@ -1,0 +1,218 @@
+{
+  "whatsapp_+5492964123456": {
+    "context": "initial",
+    "pending_order": {
+      "order_id": "order_20250522_212629",
+      "preference_id": "251034633-91af136c-432c-488d-b045-27e8303f6285",
+      "init_point": "https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=251034633-91af136c-432c-488d-b045-27e8303f6285",
+      "total_amount": 850.0,
+      "status": "pending",
+      "timestamp": "2025-05-22T21:26:32.379181"
+    },
+    "order_history": [],
+    "waiting_for_alternative": false,
+    "history": [
+      {
+        "role": "user",
+        "content": "hola, Quiero una fanta"
+      },
+      {
+        "role": "assistant",
+        "content": "¡Gracias por tu pedido! Hemos confirmado todos los productos.\n\nDatos: ${'order_id': 'order_20250521_162034', 'preference_id': '251034633-0f8f0112-0d0a-4010-aa0d-cedbbdf365b0', 'init_point': 'https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=251034633-0f8f0112-0d0a-4010-aa0d-cedbbdf365b0', 'total_amount': 850.0, 'status': 'pending', 'timestamp': '2025-05-21T16:20:36.830960'}\nUna vez realizado el pago, te confirmaremos tu pedido."
+      },
+      {
+        "role": "user",
+        "content": "he realizado el pago"
+      },
+      {
+        "role": "assistant",
+        "content": "¡Perfecto! ¿Podrías confirmarme el método de pago que utilizaste y si ya enviaste el comprobante? Así lo verifico y seguimos con la preparación de tu pedido. 😊"
+      },
+      {
+        "role": "user",
+        "content": "hola, quiero una fanta"
+      },
+      {
+        "role": "assistant",
+        "content": "¡Gracias por tu pedido! Hemos confirmado todos los productos.\n\nDatos: ${'order_id': 'order_20250521_164148', 'preference_id': '251034633-d770c681-d4ea-40db-bbcf-a14fe0bb14b3', 'init_point': 'https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=251034633-d770c681-d4ea-40db-bbcf-a14fe0bb14b3', 'total_amount': 850, 'status': 'pending', 'timestamp': '2025-05-21T16:41:50.909386'}\nUna vez realizado el pago, te confirmaremos tu pedido."
+      },
+      {
+        "role": "user",
+        "content": "ya he realizado el pago"
+      },
+      {
+        "role": "assistant",
+        "content": "¡Perfecto! ¿Podrías confirmarme si ya enviaste el comprobante de pago? Así verificamos y comenzamos a preparar tu pedido. 😊"
+      },
+      {
+        "role": "user",
+        "content": "hola, quiero una fanta"
+      },
+      {
+        "role": "assistant",
+        "content": "¡Gracias por tu pedido! Hemos confirmado todos los productos.\n\nDatos: ${'order_id': 'order_20250521_191937', 'preference_id': '251034633-10f0f633-3b04-4f0f-b579-367765c752d0', 'init_point': 'https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=251034633-10f0f633-3b04-4f0f-b579-367765c752d0', 'total_amount': 850.0, 'status': 'pending', 'timestamp': '2025-05-21T19:19:40.484993'}\nUna vez realizado el pago, te confirmaremos tu pedido."
+      },
+      {
+        "role": "user",
+        "content": "hola, quiero una fanta"
+      },
+      {
+        "role": "assistant",
+        "content": "¡Gracias por tu pedido! Hemos confirmado todos los productos.\n\nDatos: ${'order_id': 'order_20250521_200649', 'preference_id': '251034633-85e708ec-e529-4b8a-8610-acc620c17f21', 'init_point': 'https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=251034633-85e708ec-e529-4b8a-8610-acc620c17f21', 'total_amount': 850.0, 'status': 'pending', 'timestamp': '2025-05-21T20:06:51.507319'}\nUna vez realizado el pago, te confirmaremos tu pedido."
+      },
+      {
+        "role": "user",
+        "content": "ya he realizado el pago"
+      },
+      {
+        "role": "assistant",
+        "content": "Lo siento, no pude procesar tu consulta en este momento. ¿Podrías intentarlo de nuevo?"
+      },
+      {
+        "role": "user",
+        "content": "hola quiero una fanta"
+      },
+      {
+        "role": "assistant",
+        "content": "Lo siento, no pude procesar tu consulta en este momento. ¿Podrías intentarlo de nuevo?"
+      },
+      {
+        "role": "user",
+        "content": "hola, quiero una fanta"
+      },
+      {
+        "role": "assistant",
+        "content": "¡Gracias por tu pedido! Hemos confirmado todos los productos.\n\nDatos: ${'order_id': 'order_20250521_201831', 'preference_id': '251034633-87079914-c88c-4c8b-a1a9-dffe013e17ab', 'init_point': 'https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=251034633-87079914-c88c-4c8b-a1a9-dffe013e17ab', 'total_amount': 850.0, 'status': 'pending', 'timestamp': '2025-05-21T20:20:03.085929'}\nUna vez realizado el pago, te confirmaremos tu pedido."
+      },
+      {
+        "role": "user",
+        "content": "ya he realizado el pago"
+      },
+      {
+        "role": "assistant",
+        "content": "Lo siento, no pude procesar tu consulta en este momento. ¿Podrías intentarlo de nuevo?"
+      },
+      {
+        "role": "user",
+        "content": "hola, "
+      },
+      {
+        "role": "assistant",
+        "content": "¡Hola! ¿En qué puedo ayudarte hoy? 😊"
+      },
+      {
+        "role": "user",
+        "content": "hola, quiero una Fanta"
+      },
+      {
+        "role": "assistant",
+        "content": "¡Gracias por tu pedido! Hemos confirmado todos los productos.\n\nDatos: ${'order_id': 'order_20250521_204136', 'preference_id': '251034633-0bc594c9-7f67-46ff-a472-40b9728bbb26', 'init_point': 'https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=251034633-0bc594c9-7f67-46ff-a472-40b9728bbb26', 'total_amount': 850.0, 'status': 'pending', 'timestamp': '2025-05-21T20:41:39.446651'}\nUna vez realizado el pago, te confirmaremos tu pedido."
+      },
+      {
+        "role": "user",
+        "content": "ya he realizado el pago"
+      },
+      {
+        "role": "assistant",
+        "content": "Lo siento, no pude procesar tu consulta en este momento. ¿Podrías intentarlo de nuevo?"
+      },
+      {
+        "role": "user",
+        "content": "hola"
+      },
+      {
+        "role": "assistant",
+        "content": "¡Hola! Bienvenido a Delicias Fueguinas. 😊 ¿En qué puedo ayudarte hoy?"
+      },
+      {
+        "role": "user",
+        "content": "hola, quiero una fanta"
+      },
+      {
+        "role": "assistant",
+        "content": "Lo siento, tuvimos un problema al procesar tu pedido. ¿Podrías intentarlo de nuevo?"
+      },
+      {
+        "role": "user",
+        "content": "exity"
+      },
+      {
+        "role": "assistant",
+        "content": "Lo siento, no pude procesar tu consulta en este momento. ¿Podrías intentarlo de nuevo?"
+      },
+      {
+        "role": "user",
+        "content": "hola, quiero una Fanta"
+      },
+      {
+        "role": "assistant",
+        "content": "¡Gracias por tu pedido! Hemos confirmado todos los productos.\n\nDatos: ${'order_id': 'order_20250522_203135', 'preference_id': '251034633-8960cfa1-5322-4232-9d68-d2f74f5abd1c', 'init_point': 'https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=251034633-8960cfa1-5322-4232-9d68-d2f74f5abd1c', 'total_amount': 850.0, 'status': 'pending', 'timestamp': '2025-05-22T20:31:38.388218'}\nUna vez realizado el pago, te confirmaremos tu pedido."
+      },
+      {
+        "role": "user",
+        "content": "hola"
+      },
+      {
+        "role": "assistant",
+        "content": "¡Hola! Bienvenido a Delicias Fueguinas. 😊 ¿En qué puedo ayudarte hoy?"
+      },
+      {
+        "role": "user",
+        "content": "hola, quiero una fanta"
+      },
+      {
+        "role": "assistant",
+        "content": "¡Gracias por tu pedido! Hemos confirmado todos los productos.\n\nDatos: ${'order_id': 'order_20250522_212629', 'preference_id': '251034633-91af136c-432c-488d-b045-27e8303f6285', 'init_point': 'https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=251034633-91af136c-432c-488d-b045-27e8303f6285', 'total_amount': 850.0, 'status': 'pending', 'timestamp': '2025-05-22T21:26:32.379181'}\nUna vez realizado el pago, te confirmaremos tu pedido."
+      },
+      {
+        "role": "user",
+        "content": "ya pague"
+      },
+      {
+        "role": "assistant",
+        "content": "¡Perfecto! ¿Podrías confirmarme si enviaste el comprobante de pago? Así verificamos y comenzamos a preparar tu pedido. 😊"
+      },
+      {
+        "role": "user",
+        "content": "hola, quiero una Fanta"
+      },
+      {
+        "role": "assistant",
+        "content": "¡Gracias por tu pedido! Hemos confirmado todos los productos.\n\nDatos: ${'order_id': 'order_20250527_164647', 'preference_id': '251034633-26f0de26-2ca4-434f-875c-3ece9dfc6a3a', 'init_point': 'https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=251034633-26f0de26-2ca4-434f-875c-3ece9dfc6a3a', 'total_amount': 850.0, 'status': 'pending', 'timestamp': '2025-05-27T16:46:50.394967'}\nUna vez realizado el pago, te confirmaremos tu pedido."
+      },
+      {
+        "role": "user",
+        "content": "he realizado el pago"
+      },
+      {
+        "role": "assistant",
+        "content": "¡Genial! ¿Podrías enviarme el comprobante de pago para verificarlo? Una vez confirmado, empezaremos con la preparación de tu pedido. 😊"
+      },
+      {
+        "role": "user",
+        "content": "hola, quiero una Fanta"
+      },
+      {
+        "role": "assistant",
+        "content": "¡Gracias por tu pedido! Hemos confirmado todos los productos.\n\nDatos: ${'order_id': 'order_20250527_170028', 'preference_id': '251034633-b26b920a-df8c-4f07-bb3c-2b0293720b5b', 'init_point': 'https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=251034633-b26b920a-df8c-4f07-bb3c-2b0293720b5b', 'total_amount': 850.0, 'status': 'pending', 'timestamp': '2025-05-27T17:00:30.635274'}\nUna vez realizado el pago, te confirmaremos tu pedido."
+      },
+      {
+        "role": "user",
+        "content": "ya he realizado el pago"
+      },
+      {
+        "role": "assistant",
+        "content": "¡Perfecto! Por favor, envíame el comprobante de pago para que lo pueda verificar y así comenzaremos a preparar tu pedido. 😊"
+      },
+      {
+        "role": "user",
+        "content": "hola, quiero una Fanta"
+      },
+      {
+        "role": "assistant",
+        "content": "¡Gracias por tu pedido! Hemos confirmado todos los productos.\n\nDatos: ${'order_id': 'order_20250528_234145', 'preference_id': '251034633-c80a6dfd-6e04-4a2b-ae96-85828b8f68d1', 'init_point': 'https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=251034633-c80a6dfd-6e04-4a2b-ae96-85828b8f68d1', 'total_amount': 850.0, 'status': 'pending', 'timestamp': '2025-05-28T23:41:49.660658'}\nUna vez realizado el pago, te confirmaremos tu pedido."
+      }
+    ],
+    "last_updated": "2025-05-28T23:41:55.383353"
+  }
+}

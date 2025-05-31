@@ -77,7 +77,7 @@ class OrchestratorAgent:
         
         # NUEVO: Verificar notificaciones pendientes
         if state.get("should_notify_payment"):
-            notification_message = state.get("notification_message", "Tu pago ha sido procesado.")
+            notification_message = state.get("notification_message", "Ya recibimos tu pago. Estamos preparando tu pedido.")
             # Limpiar la notificación para no mostrarla nuevamente
             state["should_notify_payment"] = False
             self.state_manager.update_state(user_id, state)
@@ -201,10 +201,22 @@ class OrchestratorAgent:
     async def _handle_greeting(self, message: str, user_id: str = None) -> str:
         """Handle user greetings"""
         try:
+            # Obtener el estado del usuario
+            state = self.state_manager.get_state(user_id) if user_id else {}
+            
+            # Construir los mensajes incluyendo el historial si existe
+            messages = [{"role": "system", "content": self.system_message}]
+            
+            # Añadir el historial de conversación si existe
+            if user_id and "history" in state:
+                messages.extend(state["history"])
+            
+            # Añadir el mensaje actual
+            messages.append({"role": "user", "content": message})
+            
             response = await client.chat.completions.create(
                 model=MODEL_NAME,
-                messages=[{"role": "system", "content": self.system_message}]
-                + self.conversation_state[user_id]["history"],
+                messages=messages,
             )
             return response.choices[0].message.content
         except Exception as e:
@@ -214,10 +226,22 @@ class OrchestratorAgent:
     async def _handle_query(self, message: str, user_id: str = None) -> str:
         """Handle general queries"""
         try:
+            # Obtener el estado del usuario
+            state = self.state_manager.get_state(user_id) if user_id else {}
+            
+            # Construir los mensajes incluyendo el historial si existe
+            messages = [{"role": "system", "content": self.system_message}]
+            
+            # Añadir el historial de conversación si existe
+            if user_id and "history" in state:
+                messages.extend(state["history"])
+            
+            # Añadir el mensaje actual
+            messages.append({"role": "user", "content": message})
+            
             response = await client.chat.completions.create(
                 model=MODEL_NAME,
-                messages=[{"role": "system", "content": self.system_message}]
-                + self.conversation_state[user_id]["history"],
+                messages=messages,
             )
             return response.choices[0].message.content
         except Exception as e:

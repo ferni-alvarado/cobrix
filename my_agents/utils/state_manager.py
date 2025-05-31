@@ -59,11 +59,29 @@ class StateManager:
 
     def _save_state(self):
         """Guarda el estado en archivos persistentes"""
+        print(f"🔍 [_save_state] Iniciando guardado. Estados en memoria: {len(self._conversation_states)}")
+    
+        # Verificar el contenido específico antes de guardar
+        for user_id, state in self._conversation_states.items():
+            print(f"🔍 [_save_state] Usuario {user_id}:")
+            print(f"🔍 [_save_state] - should_notify_payment: {state.get('should_notify_payment')}")
+            print(f"🔍 [_save_state] - pending_order.status: {state.get('pending_order', {}).get('status')}")
+
         # Guardar estados de conversación
         state_file = self._data_dir / "conversation_states.json"
         try:
+            print(f"🔍 [_save_state] Escribiendo a: {state_file}")
             with open(state_file, "w", encoding="utf-8") as f:
                 json.dump(self._conversation_states, f, ensure_ascii=False, indent=2)
+            print(f"🔍 [_save_state] Guardado exitoso")
+            # Verificación inmediata
+            with open(state_file, "r", encoding="utf-8") as f:
+                verificacion = json.load(f)
+            
+            for user_id, state in verificacion.items():
+                print(f"🔍 [_save_state] VERIFICACIÓN Usuario {user_id}:")
+                print(f"🔍 [_save_state] VERIFICACIÓN - should_notify_payment: {state.get('should_notify_payment')}")
+                print(f"🔍 [_save_state] VERIFICACIÓN - pending_order.status: {state.get('pending_order', {}).get('status')}")
         except Exception as e:
             print(f"⚠️ Error guardando estados de conversación: {e}")
         
@@ -81,6 +99,10 @@ class StateManager:
 
     def get_state(self, user_id: str) -> Dict:
         """Obtiene el estado de conversación para un usuario"""
+
+        # Recargar estado desde archivo para asegurar datos actualizados
+        self._load_state()
+
         if user_id not in self._conversation_states:
             # Inicializar estado para nuevo usuario
             self._conversation_states[user_id] = {
@@ -123,8 +145,11 @@ class StateManager:
         Returns:
             bool: True si se actualizó correctamente, False si no se encontró
         """
+        print(f"🔍 update_payment_status llamado con preference_id: {preference_id}, status: {status}")
+
         # Buscar el user_id asociado con este preference_id
         user_id = self._preference_mapping.get(preference_id)
+        print(f"🔍 user_id encontrado: {user_id}")
         if not user_id:
             print(f"⚠️ No se encontró usuario para preference_id: {preference_id}")
             return False
@@ -132,11 +157,14 @@ class StateManager:
         # Obtener el estado actual del usuario
         state = self._conversation_states.get(user_id, {})
         pending_order = state.get("pending_order", {})
-        
+        print(f"🔍 pending_order actual: {pending_order}")
+
         # Verificar que el pedido existe y coincide
         if not pending_order or pending_order.get("preference_id") != preference_id:
             print(f"⚠️ No se encontró un pedido pendiente con preference_id: {preference_id}")
             return False
+        
+        print(f"🔍 Actualizando estado de {pending_order.get('status')} a {status}")
             
         # Actualizar el estado del pedido
         pending_order["status"] = status
@@ -151,20 +179,25 @@ class StateManager:
         # Marcar que debe notificar en la próxima interacción
         state["should_notify_payment"] = True
         state["notification_message"] = self._get_payment_notification_message(status)
+        pending_order["status"] = "approved"
+
         
+        print(f"🔍 state: {state}")
         # Guardar en el historial si está aprobado
         if status == "approved" and not any(order.get("order_id") == pending_order.get("order_id") for order in state.get("order_history", [])):
             if not state.get("order_history"):
                 state["order_history"] = []
-            
+            print(f"🔍 order_history: {state['order_history']}")
             # Crear copia del pedido para el historial
             order_copy = pending_order.copy()
             order_copy["completed_at"] = datetime.now().isoformat()
             state["order_history"].append(order_copy)
         
         # Actualizar el estado y guardar
+        print(f"🔍 [StateManager] A punto de llamar _save_state() - timestamp: {datetime.now().isoformat()}")
         self._conversation_states[user_id] = state
         self._save_state()
+        print(f"🔍 [StateManager] _save_state() completado - timestamp: {datetime.now().isoformat()}")
         return True
 
     def _get_payment_notification_message(self, status: str) -> str:

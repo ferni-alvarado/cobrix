@@ -1,0 +1,15 @@
+{
+  "validated_products": [
+    {
+      "name": "Fanta",
+      "quantity": 1,
+      "unit_price": 850.0,
+      "subtotal": 850.0
+    }
+  ],
+  "not_found_products": [],
+  "out_of_stock_products": [],
+  "available_ice_cream_flavors": [],
+  "unavailable_ice_cream_flavors": [],
+  "total_amount": 850.0
+}

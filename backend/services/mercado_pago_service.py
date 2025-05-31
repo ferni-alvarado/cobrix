@@ -7,7 +7,7 @@ from backend.services.websocket_manager import broadcast_payment_update
 
 load_dotenv()
 
-BASE_URL = "https://094c-179-62-95-234.ngrok-free.app"
+BASE_URL = "https://fb23-179-62-95-234.ngrok-free.app"
 NOTIFICATION_URL = f"{BASE_URL.rstrip('/')}/webhook"
 access_token = os.getenv("MERCADO_PAGO_ACCESS_TOKEN")
 
@@ -120,6 +120,7 @@ async def process_webhook_event(payload: dict):
 
             payment_response = sdk.payment().get(payment_id)
             payment = payment_response["response"]
+            print(f"🔍 Respuesta completa del pago: {payment}")
 
             status = payment.get("status")
             external_reference = payment.get("external_reference")
@@ -136,6 +137,38 @@ async def process_webhook_event(payload: dict):
             }
 
             print(f"Datos de pago procesados: {update_data}")
+            # NUEVO: Actualizar el estado en el StateManager
+            if external_reference and status:
+                from my_agents.utils.state_manager import StateManager
+                
+                state_manager = StateManager.get_instance()
+                
+                # Buscar preference_id a partir del order_id
+                print(f"🔍 Buscando preference_id para order_id: {external_reference}")
+                for pref_id, user_id in state_manager._preference_mapping.items():
+                    user_state = state_manager.get_state(user_id)
+                    if user_state.get("pending_order") and user_state["pending_order"].get("order_id") == external_reference:
+                        preference_id = user_state["pending_order"].get("preference_id")
+                        print(f"🔍 Encontrado preference_id: {preference_id} para order_id: {external_reference}")
+                        
+                        # Actualizar el estado del pago
+                        success = state_manager.update_payment_status(
+                            preference_id, 
+                            status,
+                            {
+                                "payment_id": payment_id,
+                                "payer_email": payer_email,
+                                "total_amount": total_amount
+                            }
+                        )
+                        print(f"🔍 Resultado detallado de update_payment_status: {success}")
+                        if success:
+                            print(f"✅ Estado actualizado para orden: {external_reference}, status: {status}")
+                        else:
+                            print(f"⚠️ No se pudo actualizar el estado para orden: {external_reference}")
+                        
+                        break
+
             await broadcast_payment_update(update_data)
 
         # Caso 2: Es una notificación de tipo "merchant_order"

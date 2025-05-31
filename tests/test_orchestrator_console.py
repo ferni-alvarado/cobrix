@@ -140,8 +140,8 @@ async def run_console_chat():
 
             elif user_input.lower() == "status":
                 # Show current conversation status
-                if user_id in orchestrator.conversation_state:
-                    state = orchestrator.conversation_state[user_id]
+                state = orchestrator.state_manager.get_state(user_id)
+                if state:
                     print_message("system", f"Current status: {state['context']}")
                     print_message(
                         "system",

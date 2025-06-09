@@ -50,8 +50,8 @@ class OrchestratorAgent:
         state = self.state_manager.get_state(user_id)
 
         # Check for pending payment notifications
-        if state.get("should_notify_payment"):
-            return self._handle_payment_notification(user_id, state)
+        # if state.get("should_notify_payment"):
+        #    return self._handle_payment_notification(user_id, state) Lo podés eliminar si el notifier_loop se encarga 100% de notificar pagos
 
         # Save message in history
         state["history"].append({"role": "user", "content": message})

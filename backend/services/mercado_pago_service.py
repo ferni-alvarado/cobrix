@@ -4,6 +4,7 @@ import mercadopago
 from dotenv import load_dotenv
 
 from backend.services.websocket_manager import broadcast_payment_update
+from my_agents.core.state_manager import StateManager
 
 load_dotenv()
 
@@ -138,6 +139,8 @@ async def process_webhook_event(payload: dict):
             payment_id = payload["data"]["id"]
             print(f"Procesando notificación de pago con ID: {payment_id}")
 
+            state_manager = StateManager.get_instance()
+
             payment_response = sdk.payment().get(payment_id)
             payment = payment_response["response"]
 
@@ -171,6 +174,41 @@ async def process_webhook_event(payload: dict):
 
             print(f"Datos de pago procesados: {update_data}")
             await broadcast_payment_update(update_data)
+
+            # Actualizar el estado usando order_id
+            if external_reference and status:
+                user_id = state_manager.find_user_by_order_id(external_reference)
+
+                if user_id:
+                    print(
+                        f"Usuario encontrado: {user_id} para order_id: {external_reference}"
+                    )
+
+                    payment_metadata = {
+                        "payment_id": payment_id,
+                        "payer_name": payer_name,
+                        "payer_phone_number": full_phone_number,
+                        "total_amount": total_amount,
+                    }
+
+                    success = state_manager.update_payment_status_by_order_id(
+                        order_id=external_reference,
+                        status=status,
+                        metadata=payment_metadata,
+                    )
+
+                    if success:
+                        print(
+                            f"✅ Estado actualizado correctamente para order_id: {external_reference}"
+                        )
+                    else:
+                        print(
+                            f"❌ No se pudo actualizar el estado para order_id: {external_reference}"
+                        )
+                else:
+                    print(
+                        f"⚠️ No se encontró usuario para order_id: {external_reference}"
+                    )
 
         # Caso 2: Es una notificación de tipo "merchant_order"
         elif "topic" in payload and payload.get("topic") == "merchant_order":

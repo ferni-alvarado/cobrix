@@ -217,3 +217,73 @@ class StateManager:
                 return order
 
         return None
+
+    # Agregar este método al StateManager (paste-3.txt)
+
+    def update_payment_status_by_order_id(
+        self, order_id: str, status: str, metadata: Optional[Dict] = None
+    ) -> bool:
+        """
+        Actualiza el estado de pago para un pedido identificado por order_id.
+
+        Args:
+            order_id: ID de la orden
+            status: Nuevo estado (approved, pending, rejected, etc.)
+            metadata: Información adicional sobre el pago
+
+        Returns:
+            bool: True si se actualizó correctamente, False si no se encontró
+        """
+        # Buscar el user_id asociado con este order_id
+        user_id = self._order_mapping.get(order_id)
+        if not user_id:
+            print(f"⚠️ No se encontró usuario para order_id: {order_id}")
+            return False
+
+        # Obtener el estado actual del usuario
+        state = self._conversation_states.get(user_id, {})
+        pending_order = state.get("pending_order", {})
+
+        # Verificar que el pedido existe y coincide
+        if not pending_order or pending_order.get("order_id") != order_id:
+            print(f"⚠️ No se encontró un pedido pendiente con order_id: {order_id}")
+            return False
+
+        # Actualizar el estado del pedido
+        pending_order["status"] = status
+        pending_order["payment_updated_at"] = datetime.now().isoformat()
+
+        # Añadir metadatos si fueron proporcionados
+        if metadata:
+            if not pending_order.get("payment_metadata"):
+                pending_order["payment_metadata"] = {}
+            pending_order["payment_metadata"].update(metadata)
+
+        # Marcar que debe notificar en la próxima interacción
+        state["should_notify_payment"] = True
+        state["notification_message"] = self._get_payment_notification_message(status)
+
+        # Guardar en el historial si está aprobado
+        if status == "approved" and not any(
+            order.get("order_id") == pending_order.get("order_id")
+            for order in state.get("order_history", [])
+        ):
+            if not state.get("order_history"):
+                state["order_history"] = []
+
+            # Crear copia del pedido para el historial
+            order_copy = pending_order.copy()
+            order_copy["completed_at"] = datetime.now().isoformat()
+            state["order_history"].append(order_copy)
+
+        # Actualizar el estado y guardar
+        self._conversation_states[user_id] = state
+        self._save_state()
+        return True
+
+    def get_all_states(self) -> Dict[str, Dict]:
+        """
+        Retorna una copia del diccionario de estados de conversación
+        para todos los usuarios.
+        """
+        return self._conversation_states.copy()

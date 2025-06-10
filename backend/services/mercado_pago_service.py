@@ -4,7 +4,7 @@ import mercadopago
 from dotenv import load_dotenv
 
 from backend.services.websocket_manager import broadcast_payment_update
-from my_agents.core.state_manager import StateManager
+from my_agents.core.state_manager_json import JSONStateManager
 
 load_dotenv()
 
@@ -139,7 +139,7 @@ async def process_webhook_event(payload: dict):
             payment_id = payload["data"]["id"]
             print(f"Procesando notificación de pago con ID: {payment_id}")
 
-            state_manager = StateManager.get_instance()
+            state_manager = JSONStateManager.get_instance()
 
             payment_response = sdk.payment().get(payment_id)
             payment = payment_response["response"]

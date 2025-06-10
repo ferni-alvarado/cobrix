@@ -1,7 +1,7 @@
 import asyncio
 import logging
 
-from my_agents.core.state_manager import StateManager
+from my_agents.core.state_manager_json import JSONStateManager
 
 from ..order_processing.payment_coordinator import PaymentCoordinator
 
@@ -20,14 +20,16 @@ async def send_message(user_id: str, message: str):
 
 async def payment_notifier_loop():
     logging.info("Iniciando payment_notifier_loop")
-    state_manager = StateManager.get_instance()
+    state_manager = JSONStateManager.get_instance()
     payment_coordinator = PaymentCoordinator()
 
     while True:
         all_states = state_manager.get_all_states()
         notified_any = False
 
-        logging.debug(f"🔍 Obteniendo todos los estados del StateManager: {all_states}")
+        logging.debug(
+            f"🔍 Obteniendo todos los estados del JSONStateManager: {all_states}"
+        )
 
         for user_id, state in all_states.items():
             logging.debug(f"🔵 Revisando estado para usuario {user_id}: {state}")

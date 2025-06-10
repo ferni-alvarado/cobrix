@@ -3,8 +3,8 @@ from typing import Dict, List, Optional
 
 from dotenv import load_dotenv
 
-# NUEVO: Importar el StateManager
-from my_agents.core.state_manager import StateManager
+# NUEVO: Importar el JSONStateManager
+from my_agents.core.state_manager_json import JSONStateManager
 from my_agents.openai_agents.order_processing_agent import run_agent_with_order
 from my_agents.openai_agents.payment_link_generator_agent import (
     run_agent_with_order as generate_payment_link,
@@ -57,8 +57,8 @@ class OrchestratorAgent:
             an attentive and helpful employee of the business.
             """
 
-        # NUEVO: Usar StateManager en lugar de conversation_state
-        self.state_manager = StateManager.get_instance()
+        # NUEVO: Usar JSONStateManager en lugar de conversation_state
+        self.state_manager = JSONStateManager.get_instance()
         # ELIMINAR: self.conversation_state = {}
 
     async def handle_message(self, message: str, user_id: str) -> str:
@@ -72,7 +72,7 @@ class OrchestratorAgent:
         Returns:
             The response to send to the user
         """
-        # MODIFICADO: Obtener estado del StateManager
+        # MODIFICADO: Obtener estado del JSONStateManager
         state = self.state_manager.get_state(user_id)
 
         # NUEVO: Verificar notificaciones pendientes
@@ -228,7 +228,7 @@ class OrchestratorAgent:
 
     async def _handle_order(self, message: str, user_id: str) -> str:
         """Handle orders, verify stock and generate payment links"""
-        # MODIFICADO: Obtener estado del StateManager
+        # MODIFICADO: Obtener estado del JSONStateManager
         state = self.state_manager.get_state(user_id)
 
         # If we're waiting for a response for alternatives
@@ -307,7 +307,7 @@ class OrchestratorAgent:
             payment_link_result = await generate_payment_link(payment_data)
             print(f"Payment link result: {payment_link_result}")
 
-            # NUEVO: Registrar el pedido en el StateManager
+            # NUEVO: Registrar el pedido en el JSONStateManager
             if payment_link_result and "preference_id" in payment_link_result:
                 # Guardar el pedido en el estado
                 state["pending_order"] = payment_link_result
@@ -338,7 +338,7 @@ class OrchestratorAgent:
 
     async def _handle_alternative_response(self, message: str, user_id: str) -> str:
         """Handle customer response when alternatives are offered due to stock issues"""
-        # MODIFICADO: Obtener estado del StateManager
+        # MODIFICADO: Obtener estado del JSONStateManager
         state = self.state_manager.get_state(user_id)
 
         try:

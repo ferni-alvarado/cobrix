@@ -1,16 +1,14 @@
-# my_agents/orchestrator/message_handlers/__init__.py
-
 from abc import ABC, abstractmethod
 
 from my_agents.core.config import MODEL_NAME, client
-from my_agents.core.state_manager import StateManager
+from my_agents.core.state_manager_json import JSONStateManager
 
 
 class BaseMessageHandler(ABC):
     """Base class for all message handlers"""
 
     def __init__(self):
-        self.state_manager = StateManager.get_instance()
+        self.state_manager = JSONStateManager.get_instance()
 
     @abstractmethod
     async def handle(self, message: str, user_id: str) -> str:

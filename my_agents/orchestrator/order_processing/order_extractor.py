@@ -1,5 +1,3 @@
-# my_agents/orchestrator/order_processing/order_extractor.py
-
 import json
 from typing import Dict, List, Optional
 

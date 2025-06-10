@@ -1,5 +1,3 @@
-# my_agents/orchestrator/order_processing/payment_coordinator.py
-
 from typing import Dict, Optional
 
 

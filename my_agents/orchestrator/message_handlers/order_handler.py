@@ -1,4 +1,4 @@
-from my_agents.core.state_manager import StateManager
+from my_agents.core.state_manager_json import JSONStateManager
 from my_agents.openai_agents.order_processing_agent import run_agent_with_order
 from my_agents.openai_agents.payment_link_generator_agent import (
     run_agent_with_order as generate_payment_link,
@@ -11,7 +11,7 @@ from ..order_processing.payment_coordinator import PaymentCoordinator
 
 class OrderHandler:
     def __init__(self):
-        self.state_manager = StateManager.get_instance()
+        self.state_manager = JSONStateManager.get_instance()
         self.order_extractor = OrderExtractor()
         self.alternative_manager = AlternativeManager()
         self.payment_coordinator = PaymentCoordinator()

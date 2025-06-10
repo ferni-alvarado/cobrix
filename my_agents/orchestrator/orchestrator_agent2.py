@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 
-from my_agents.core.state_manager import StateManager
+from my_agents.core.state_manager_json import JSONStateManager
 from my_agents.utils.instructions import load_instructions
 
 from .intent_classifier import IntentClassifier
@@ -25,7 +25,7 @@ class OrchestratorAgent:
             self.system_message = self._get_default_system_message()
 
         # Initialize components
-        self.state_manager = StateManager.get_instance()
+        self.state_manager = JSONStateManager.get_instance()
         self.intent_classifier = IntentClassifier()
 
         # Initialize handlers
